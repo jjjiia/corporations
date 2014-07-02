@@ -130,6 +130,34 @@ function histogramData() {
 	return timelinedata
 }
 
+var drag = d3.behavior.drag()
+    .origin(function(d) { return d; })
+    .on("dragstart", dragstarted)
+    .on("drag", dragged)
+    .on("dragend", dragended);
+
+function dragstarted(d) {
+  d3.event.sourceEvent.stopPropagation();
+  d3.select(this).classed("dragging", true);
+}
+
+function dragged(d, e) {
+  var handle = d3.select(this)
+  var x = parseFloat(handle.attr("drag-x")) + d3.event.dx
+  var snapOffset = parseFloat(handle.attr("snap-offset"))
+  if(x >= handle.attr("drag-start") && x <= handle.attr("drag-end")){
+	  handle.attr("drag-x", x)
+	  var snappedX = Math.floor(handle.attr("drag-x")/snapOffset)*snapOffset
+	  handle.attr("x", snappedX);
+  }
+  d3.select(this).property("dragging-callback").run.apply(this)
+  
+}
+
+function dragended(d) {
+  d3.select(this).classed("dragging", false);
+}
+
 
 function drawHistogram(histogramdata){
 	var width = 1000
@@ -143,11 +171,79 @@ function drawHistogram(histogramdata){
 	  .attr('class', 'd3-tip')
 	  .offset([-10, 0])
     svg3 = d3.select("#svgContainer3").append("svg");
+
+	var slider = null
+	var leftHandle = null
+	var rightHandle = null
+
+	slider = svg3.append("rect")
+		.attr("x", 20)
+		.attr("y", 0)
+		.attr("width", width-20)
+		.attr("height", height-20)
+		.attr("fill", "#E1883B")
+		.attr("opacity", 0.1)
+		
+	leftHandle = svg3.append("rect")
+		.attr("x", 20)
+		.attr("y", 0)
+		.attr("width", barwidth)
+		.attr("drag-x", 20)
+		.attr("drag-start", 20)
+		.attr("drag-end", width)
+		.attr("snap-offset", barwidth+2)
+		.attr("height", height-20)
+		.attr("fill", "red")
+		.property("dragging-callback", {
+			run: function(){
+				var leftX = d3.select(this).attr("x")
+				var rightX = rightHandle.attr("x")
+				slider.attr("x", leftX)
+				slider.attr("width", rightX - leftX)
+				rightHandle.attr("drag-start", leftX+100)
+				var yearStart = Math.floor(yearscale.invert(leftX))
+				var yearEnd = Math.floor(yearscale.invert(rightX))
+				var data = renderMultipleYears(yearStart,yearEnd)
+				renderWorldMap(data)
+				renderUSMap(data)
+			}
+		})
+		.call(drag);
+		
+	rightHandle =svg3.append("rect")
+		.attr("x", width)
+		.attr("y", 0)
+		.attr("drag-x", width)
+		
+		.attr("drag-start", 20)
+		.attr("drag-end", width)
+		.attr("snap-offset", barwidth+2)
+		.attr("width", barwidth)
+		.attr("height", height-20)
+		.attr("fill", "red")
+		.property("dragging-callback", {
+			run: function(){
+				var rightX = d3.select(this).attr("x")
+				var leftX = leftHandle.attr("x")
+				slider.attr("x", leftX)
+				slider.attr("width",rightX - leftX)
+				leftHandle.attr("drag-end", rightX)
+				var yearStart = Math.floor(yearscale.invert(leftX))
+				var yearEnd = Math.floor(yearscale.invert(rightX))
+				var data = renderMultipleYears(yearStart,yearEnd)
+				renderWorldMap(data)
+				renderUSMap(data)
+			}
+		})
+		.call(drag);
+		
 	svg3.call(tip);
+	
 	svg3.selectAll("rect")
 		.data(histogramdata)
 		.enter()
 		.append("rect")
+		.attr("class", "histoRects")
 	    .attr("x", function(d){
 			//console.log(yearscale(d[0]))
 			return yearscale(d[0])})
@@ -157,11 +253,10 @@ function drawHistogram(histogramdata){
 		.attr("fill", function(d){
 			return "#aaa"
 		})
-		.transition()
-		.duration(1000)
 		.attr("height", function(d){return yscale(d[1])});
-	
-	svg3.selectAll("rect")
+
+		
+	svg3.selectAll("rect.histoRects")
 		.on('mouseover', function(d){
 			id = $(this).attr("id");
 			tip.html(function(d){return id})
@@ -175,17 +270,15 @@ function drawHistogram(histogramdata){
 		.on("click", function(d){
 			id = $(this).attr("id");
 			
-			var yearStart = 1880
-			var yearEnd = id
+			var yearStart = id
+			var yearEnd = parseInt(id)
 			
 			var data = renderMultipleYears(yearStart,yearEnd)
-			console.log(data)
 			if(yearStart == yearEnd){
 				var year = yearStart
 			}else{
 				var year = yearStart + " - " + yearEnd
 			}
-			
 			
 			//for updating the text outputs only
 			var companiesCount = data.sum
@@ -196,7 +289,7 @@ function drawHistogram(histogramdata){
 			//set current
 			d3.select("#svgContainer3 svg").remove();
 			drawHistogram(histogramData());
-			d3.selectAll("rect").attr("fill", "#aaa")
+			d3.selectAll("rect.histoRects").attr("fill", "#aaa")
 			var header = "<table style=\"width:800px\"><tr><td>Company Name</td><td>Zipcode</td><td>Jurisdiction</td></tr>"
 			var formattedCompanyText =  header+formatCompanyList(data["companies"])
 			d3.selectAll("#companyList").html("<br/><br/>Companies Registered in the Year <span style='color:#ECAB23'>"+ year + "</span><br/><br/>"+ formattedCompanyText)
@@ -216,23 +309,16 @@ function drawHistogram(histogramdata){
 			var colorScale = d3.scale.sqrt().domain([0, d3.max(nycJSON.features, numCompaniesZip)]).range(["#eee", "#ff2222"]); 
 			
 			// Removes all of the country highlights
-			svg2.selectAll("path").attr("class","unmarked").attr("fill","#eee").transition().duration(200);
 			// Adds highlights back to the countries			
 			renderWorldMap(data)
 			
 
 			// Unhighlight all of the zip codes
-			var marked_zipcodes = svg1.selectAll(".marked");
-			if (marked_zipcodes.length > 0){
-				marked_zipcodes.each(function(d,i){
-					d3.select(this).attr("class","unmarked").attr("fill","#eee").transition().duration(200);
-				});
-			}
 			// Update the highlights of the zip codes
 			renderUSMap(data)
 			
 			//for coloring histogram itself
-			svg3.selectAll("rect")
+			svg3.selectAll("rect.histoRects")
 			.attr("fill", function(d){ 
 				if(d[0]>=yearStart && d[0]<=yearEnd){
 					return "#ECAB23";
@@ -241,7 +327,9 @@ function drawHistogram(histogramdata){
 				}
 			});
 		})
+		
 
+		
 	var xAxis = d3.svg.axis().scale(yearscale).tickSize(1).ticks(16).tickFormat(d3.format("d"))
 	svg3.append("g")
 		.attr("class", "x axis")
@@ -252,10 +340,12 @@ function drawHistogram(histogramdata){
 	
     svg3.append("g")
         .attr("class", "y axis")
-        .attr("transform", "translate(" + width + ",0)")
+        .attr("transform", "translate(" + (width+8) + ",0)")
         .call(yAxis);	
 }
 function renderWorldMap(data){
+	svg2.selectAll("path").attr("class","unmarked").attr("fill","#eee").transition().duration(200);
+	
 	data['regions'].forEach(function(d){
 		jurisdiction = d.split(" ").join("_");
 		if (jurisdiction == "COTE_D'IVOIRE"){
@@ -275,15 +365,20 @@ function renderWorldMap(data){
 	});
 }
 function renderUSMap(data){
+	svg1.selectAll("path").attr("fill","#eee");
 	data['zipcodes'].forEach(function(d){
 		zipcode = d
 		var max = data['maxZip']
-		var color = getZipcodeColor(max, data['values'][zipcode]);
+		var color = getZipcodeColor(1000, data['values'][zipcode]);
 		svg1.select("#zip_"+d).attr("class","marked").transition().duration(200).attr("fill",color).attr("stroke", color);
 	})
 }
 //histogram click handler for svg2-world
 function renderMultipleYears(yearStart, yearEnd){
+	yearStart = parseInt(yearStart)
+	yearEnd = parseInt(yearEnd)
+	console.log("hello", yearStart, yearEnd)
+	
 	// tally all years
 	var data = {}
 	data.zipcodes = []
@@ -298,7 +393,6 @@ function renderMultipleYears(yearStart, yearEnd){
 	data.jurisdiction = {}
 	
 	for(var year = yearStart; year <= yearEnd; year++){
-		console.log( time_region_zip[year])
 		
 		if(time_region_zip[year]){
 			
@@ -310,7 +404,6 @@ function renderMultipleYears(yearStart, yearEnd){
 
 				if(data.regions.indexOf(jurisdiction)<0){
 					data.regions.push(jurisdiction)
-					console.log(jurisdiction)
 				}
 
 				if(data.jurisdiction[jurisdiction]){
@@ -358,7 +451,6 @@ function renderMultipleYears(yearStart, yearEnd){
 		
 		}
 	}
-	console.log(data.regions)
 	return data
 	//render on map
 	
@@ -595,7 +687,6 @@ function renderMultipleYears(yearStart, yearEnd){
 							
 							var companyNameString = "<span style = 'font-size:11px'><br/>"+ toTitleCase(companyName[0][0])+"<br/> Registered: "+ companyName[0][2]+"</span"
 							
-							console.log(companyNameString)
 							$("#currentSelection").html(sum +" Company from <span style='color:#2DA1B3'>"+ toTitleCase(countryName) +"</span> is registered in New York City - zipcode "+zipcode+"<br/>"+companyNameString);
 							
 							d3.selectAll("#detailMore").html("")	
