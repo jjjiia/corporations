@@ -150,12 +150,19 @@ function dragged(d, e) {
   
   var leftOffset = x//-d3.select(this).property("drag-mousedown-x")
   var rightOffset = leftOffset+parseFloat(d3.select(this).attr("width"))
-  if(leftOffset >= handle.attr("drag-start") && rightOffset <= handle.attr("drag-end")){
-	  handle.attr("drag-x", x)
-	  var snappedX = Math.floor(handle.attr("drag-x")/snapOffset)*snapOffset
-	  handle.attr("x", snappedX);
-	  
+
+  if(leftOffset <= handle.attr("drag-start")) {
+	  x = parseFloat(handle.attr("drag-start"))
   }
+
+  if(rightOffset >= handle.attr("drag-end")) {
+	  x = parseFloat(handle.attr("drag-end")) - parseFloat(d3.select(this).attr("width"))
+  }
+
+  handle.attr("drag-x", x)
+  var snappedX = Math.floor(handle.attr("drag-x")/snapOffset)*snapOffset
+  handle.attr("x", snappedX);
+
   d3.select(this).property("dragging-callback").run.apply(this)
   
 }
@@ -171,10 +178,10 @@ function drawHistogram(histogramdata){
 	var width = 1000
 	var height = 120
 	var barwidth = width/(2014-1880)-2
-	var yearscale = d3.scale.linear().domain([1880,2013]).range([20,width]);
+	var yearscale = d3.scale.linear().domain([1880,2014]).range([20,width]);
 	var yscale = d3.scale.log().domain([1,1050]).range([0,height-20]);
 	var y = d3.scale.log().domain([1,1050]).range([height-20,4]);
-	var barColorScale = d3.scale.linear().domain([0, height]).range(["#aaa", "#E1883B"]); 
+	var barColorScale = d3.scale.linear().domain([0, height]).range(["#aaa", "#E1883B"]);
 	var tip = d3.tip()
 	  .attr('class', 'd3-tip')
 	  .offset([-10, 0])
@@ -202,8 +209,8 @@ function drawHistogram(histogramdata){
 				leftHandle.attr("x", d3.select(this).attr("x"))
 				rightHandle.attr("x", parseFloat(d3.select(this).attr("x"))+ parseFloat(d3.select(this).attr("width")))
 				
-				var leftX = leftHandle.attr("x")
-				var rightX = rightHandle.attr("x")
+				var leftX = parseFloat(leftHandle.attr("x")) + barwidth
+				var rightX = parseFloat(rightHandle.attr("x"))-barwidth
 				
 				var yearStart = Math.floor(yearscale.invert(leftX))
 				var yearEnd = Math.floor(yearscale.invert(rightX))
