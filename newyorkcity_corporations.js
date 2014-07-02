@@ -138,6 +138,8 @@ var drag = d3.behavior.drag()
 
 function dragstarted(d) {
   d3.event.sourceEvent.stopPropagation();
+  d3.select(this).attr("drag-x", d3.select(this).attr("x"))
+  d3.select(this).property("drag-mousedown-x", d3.event.sourceEvent.x-this.getBoundingClientRect().left)
   d3.select(this).classed("dragging", true);
 }
 
@@ -145,10 +147,14 @@ function dragged(d, e) {
   var handle = d3.select(this)
   var x = parseFloat(handle.attr("drag-x")) + d3.event.dx
   var snapOffset = parseFloat(handle.attr("snap-offset"))
-  if(x >= handle.attr("drag-start") && x <= handle.attr("drag-end")){
+  
+  var leftOffset = x//-d3.select(this).property("drag-mousedown-x")
+  var rightOffset = leftOffset+parseFloat(d3.select(this).attr("width"))
+  if(leftOffset >= handle.attr("drag-start") && rightOffset <= handle.attr("drag-end")){
 	  handle.attr("drag-x", x)
 	  var snappedX = Math.floor(handle.attr("drag-x")/snapOffset)*snapOffset
 	  handle.attr("x", snappedX);
+	  
   }
   d3.select(this).property("dragging-callback").run.apply(this)
   
@@ -158,12 +164,14 @@ function dragended(d) {
   d3.select(this).classed("dragging", false);
 }
 
+var sliderDrag = d3.behavior.drag()
+
 
 function drawHistogram(histogramdata){
 	var width = 1000
 	var height = 120
 	var barwidth = width/(2014-1880)-2
-	var yearscale = d3.scale.linear().domain([1880,2014]).range([20,width]);
+	var yearscale = d3.scale.linear().domain([1880,2013]).range([20,width]);
 	var yscale = d3.scale.log().domain([1,1050]).range([0,height-20]);
 	var y = d3.scale.log().domain([1,1050]).range([height-20,4]);
 	var barColorScale = d3.scale.linear().domain([0, height]).range(["#aaa", "#E1883B"]); 
@@ -183,17 +191,49 @@ function drawHistogram(histogramdata){
 		.attr("height", height-20)
 		.attr("fill", "#E1883B")
 		.attr("opacity", 0.1)
+		.attr("drag-x", 20)
+		.attr("drag-start", 20)
+		.attr("drag-end", width)
+		.attr("snap-offset", barwidth+2)
+		.property("dragging-callback", {
+			run: function(){
+
+				
+				leftHandle.attr("x", d3.select(this).attr("x"))
+				rightHandle.attr("x", parseFloat(d3.select(this).attr("x"))+ parseFloat(d3.select(this).attr("width")))
+				
+				var leftX = leftHandle.attr("x")
+				var rightX = rightHandle.attr("x")
+				
+				var yearStart = Math.floor(yearscale.invert(leftX))
+				var yearEnd = Math.floor(yearscale.invert(rightX))
+				
+				var data = renderMultipleYears(yearStart,yearEnd)
+				renderWorldMap(data)
+				renderUSMap(data)
+				svg3.selectAll("rect.histoRects")
+				.attr("fill", function(d){ 
+					if(d[0]>=yearStart && d[0]<=yearEnd){
+						return "#ECAB23";
+					}else{
+						return "#aaa"
+					}
+				});
+			}
+		})
+		.call(drag)
 		
 	leftHandle = svg3.append("rect")
 		.attr("x", 20)
 		.attr("y", 0)
 		.attr("width", barwidth)
 		.attr("drag-x", 20)
-		.attr("drag-start", 20)
+		.attr("drag-start", 23)
 		.attr("drag-end", width)
 		.attr("snap-offset", barwidth+2)
 		.attr("height", height-20)
-		.attr("fill", "red")
+		.attr("fill", "#E1883B")
+		.attr("opacity", 0.3)
 		.property("dragging-callback", {
 			run: function(){
 				var leftX = d3.select(this).attr("x")
@@ -206,6 +246,14 @@ function drawHistogram(histogramdata){
 				var data = renderMultipleYears(yearStart,yearEnd)
 				renderWorldMap(data)
 				renderUSMap(data)
+				svg3.selectAll("rect.histoRects")
+				.attr("fill", function(d){ 
+					if(d[0]>=yearStart && d[0]<=yearEnd){
+						return "#ECAB23";
+					}else{
+						return "#aaa"
+					}
+				});
 			}
 		})
 		.call(drag);
@@ -220,7 +268,8 @@ function drawHistogram(histogramdata){
 		.attr("snap-offset", barwidth+2)
 		.attr("width", barwidth)
 		.attr("height", height-20)
-		.attr("fill", "red")
+		.attr("fill", "#E1883B")
+		.attr("opacity", 0.3)
 		.property("dragging-callback", {
 			run: function(){
 				var rightX = d3.select(this).attr("x")
@@ -233,6 +282,14 @@ function drawHistogram(histogramdata){
 				var data = renderMultipleYears(yearStart,yearEnd)
 				renderWorldMap(data)
 				renderUSMap(data)
+				svg3.selectAll("rect.histoRects")
+				.attr("fill", function(d){ 
+					if(d[0]>=yearStart && d[0]<=yearEnd){
+						return "#ECAB23";
+					}else{
+						return "#aaa"
+					}
+				});
 			}
 		})
 		.call(drag);
@@ -274,39 +331,8 @@ function drawHistogram(histogramdata){
 			var yearEnd = parseInt(id)
 			
 			var data = renderMultipleYears(yearStart,yearEnd)
-			if(yearStart == yearEnd){
-				var year = yearStart
-			}else{
-				var year = yearStart + " - " + yearEnd
-			}
-			
-			//for updating the text outputs only
-			var companiesCount = data.sum
-			var zipCount = data.zipcodes.length
-			var regionCount = data.regions.length
-			var active = Math.round(data.active*100.00/companiesCount)
-			$("#currentSelection").html("In <span style='color:#ECAB23'>"+year +"</span>, there were " +companiesCount + " new companies in "+ zipCount + " zipcodes from "+ regionCount + " countries <br/>"+active+"% are active.");
-			//set current
-			d3.select("#svgContainer3 svg").remove();
-			drawHistogram(histogramData());
-			d3.selectAll("rect.histoRects").attr("fill", "#aaa")
-			var header = "<table style=\"width:800px\"><tr><td>Company Name</td><td>Zipcode</td><td>Jurisdiction</td></tr>"
-			var formattedCompanyText =  header+formatCompanyList(data["companies"])
-			d3.selectAll("#companyList").html("<br/><br/>Companies Registered in the Year <span style='color:#ECAB23'>"+ year + "</span><br/><br/>"+ formattedCompanyText)
-			d3.selectAll("#detailMore").html("Show Companies")
-			var numCompaniesZip = function(d){
-			if(data[d.properties.postalCode]){
-				var values = data[d.properties.postalCode].values
-				var count = 0;
-				for(var key in values) {
-					count += values[key]
-				}
-				return count
-			} else {
-				return 0;
-			}
-			}
-			var colorScale = d3.scale.sqrt().domain([0, d3.max(nycJSON.features, numCompaniesZip)]).range(["#eee", "#ff2222"]); 
+			//updateText(data)
+			//var colorScale = d3.scale.sqrt().domain([0, d3.max(nycJSON.features, numCompaniesZip)]).range(["#eee", "#ff2222"]); 
 			
 			// Removes all of the country highlights
 			// Adds highlights back to the countries			
@@ -343,6 +369,40 @@ function drawHistogram(histogramdata){
         .attr("transform", "translate(" + (width+8) + ",0)")
         .call(yAxis);	
 }
+function updateText(data, yearStart, yearEnd){
+	if(yearStart == yearEnd){
+		var year = yearStart
+	}else{
+		var year = yearStart + " - " + yearEnd
+	}
+	
+	//for updating the text outputs only
+	var companiesCount = data.sum
+	var zipCount = data.zipcodes.length
+	var regionCount = data.regions.length
+	var active = Math.round(data.active*100.00/companiesCount)
+	$("#currentSelection").html("In <span style='color:#ECAB23'>"+year +"</span>, there were " +companiesCount + " new companies in "+ zipCount + " zipcodes from "+ regionCount + " countries <br/>"+active+"% are active.");
+	//set current
+	d3.select("#svgContainer3 svg").remove();
+	drawHistogram(histogramData());
+	d3.selectAll("rect.histoRects").attr("fill", "#aaa")
+	var header = "<table style=\"width:800px\"><tr><td>Company Name</td><td>Zipcode</td><td>Jurisdiction</td></tr>"
+	var formattedCompanyText =  header+formatCompanyList(data["companies"])
+	d3.selectAll("#companyList").html("<br/><br/>Companies Registered in the Year <span style='color:#ECAB23'>"+ year + "</span><br/><br/>"+ formattedCompanyText)
+	d3.selectAll("#detailMore").html("Show Companies")
+	var numCompaniesZip = function(d){
+	if(data[d.properties.postalCode]){
+		var values = data[d.properties.postalCode].values
+		var count = 0;
+		for(var key in values) {
+			count += values[key]
+		}
+		return count
+	} else {
+		return 0;
+	}
+	}
+}
 function renderWorldMap(data){
 	svg2.selectAll("path").attr("class","unmarked").attr("fill","#eee").transition().duration(200);
 	
@@ -350,7 +410,7 @@ function renderWorldMap(data){
 		jurisdiction = d.split(" ").join("_");
 		if (jurisdiction == "COTE_D'IVOIRE"){
 			jurisdiction="COTE DIVOIRE"
-			console.log("TODO fix cote divoire!!")
+			//console.log("TODO fix cote divoire!!")
 		}
 		
 		if (jurisdiction.length !=0 && jurisdiction !=undefined){
@@ -365,7 +425,7 @@ function renderWorldMap(data){
 	});
 }
 function renderUSMap(data){
-	svg1.selectAll("path").attr("fill","#eee");
+	svg1.selectAll("path").attr("fill","#eee").transition().duration(200);
 	data['zipcodes'].forEach(function(d){
 		zipcode = d
 		var max = data['maxZip']
@@ -377,7 +437,6 @@ function renderUSMap(data){
 function renderMultipleYears(yearStart, yearEnd){
 	yearStart = parseInt(yearStart)
 	yearEnd = parseInt(yearEnd)
-	console.log("hello", yearStart, yearEnd)
 	
 	// tally all years
 	var data = {}
@@ -451,8 +510,38 @@ function renderMultipleYears(yearStart, yearEnd){
 		
 		}
 	}
+	
+	//render text
+	if(yearStart == yearEnd){
+		var yearText = yearStart
+	}else{
+		var yearText = yearStart + " - " + yearEnd
+	}
+	
+	//for updating the text outputs only
+	var companiesCount = data.sum
+	var zipCount = data.zipcodes.length
+	var regionCount = data.regions.length
+	var active = Math.round(data.active*100.00/companiesCount)
+	$("#currentSelection").html("In <span style='color:#ECAB23'>"+yearText +"</span>, there were " +companiesCount + " new companies in "+ zipCount + " zipcodes from "+ regionCount + " countries <br/>"+active+"% are active.");
+	var header = "<table style=\"width:800px\"><tr><td>Company Name</td><td>Zipcode</td><td>Jurisdiction</td></tr>"
+	var formattedCompanyText =  header+formatCompanyList(data["companies"])
+	d3.selectAll("#companyList").html("<br/><br/>Companies Registered in the Year <span style='color:#ECAB23'>"+ yearText + "</span><br/><br/>"+ formattedCompanyText)
+	d3.selectAll("#detailMore").html("Show Companies")
+	var numCompaniesZip = function(d){
+	if(data[d.properties.postalCode]){
+		var values = data[d.properties.postalCode].values
+		var count = 0;
+		for(var key in values) {
+			count += values[key]
+		}
+		return count
+	} else {
+		return 0;
+	}
+	}	
+	
 	return data
-	//render on map
 	
 }
 
