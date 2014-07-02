@@ -61,7 +61,6 @@ function bindHandlers(){
 			.defer(d3.json, 'world.geojson')
 			.defer(d3.json, 'z2r_06232014_b.json')
 			.defer(d3.json, 'r2z_06232014_b.json')
-			//add time json
 			.defer(d3.json, 't2rz_06232014_b.json')
 			.defer(d3.csv, 'nyc_world_06232014.csv')
 
@@ -76,18 +75,12 @@ function bindHandlers(){
       region_zip_counts = regionzipcounts;
 	  time_region_zip = timeregionzip;
 	  world_csv = worldcsv;
-
       setProjection1(); 
       drawNYC();
-
       setProjection2();
       drawWorld();
-
 	  drawHistogram(histogramData());
-
-
       initializeController();
-
     }
 
 	function setProjection1() {
@@ -138,34 +131,15 @@ function drawHistogram(histogramdata){
 	var width = 1000
 	var height = 120
 	var barwidth = width/(2014-1880)-2
-	//var parseDate = d3.time.format("%y").parse	
-	
-	
-	var valuesArray = []
-	
-	for(var rows in histogramdata){
-		var value = histogramdata[rows][1]
-		valuesArray.push(value)
-	}
-	
-	
 	var yearscale = d3.scale.linear().domain([1880,2014]).range([20,width]);
 	var yscale = d3.scale.log().domain([1,1050]).range([0,height-20]);
 	var y = d3.scale.log().domain([1,1050]).range([height-20,4]);
-	
-	//var yscale = d3.scale.linear().domain([0,d3.max(valuesArray)]).range([5,height-20]);
-	//var y = d3.scale.linear().domain([0,d3.max(valuesArray)]).range([height-20,4]);
-	
 	var barColorScale = d3.scale.linear().domain([0, height]).range(["#aaa", "#E1883B"]); 
-	
 	var tip = d3.tip()
 	  .attr('class', 'd3-tip')
 	  .offset([-10, 0])
-
-	//console.log(test.length)
     svg3 = d3.select("#svgContainer3").append("svg");
 	svg3.call(tip);
-	
 	svg3.selectAll("rect")
 		.data(histogramdata)
 		.enter()
@@ -183,107 +157,93 @@ function drawHistogram(histogramdata){
 		.duration(1000)
 		.attr("height", function(d){return yscale(d[1])});
 	
-		svg3.selectAll("rect")
-			.on('mouseover', function(d){
-				id = $(this).attr("id");
-				tip.html(function(d){return id})
-				tip.show()
-				d3.select(this).attr("stroke", "#ECAB23").attr("stroke-opacity", 1).attr("stroke-width", 1)
-		// $("#countryName").html(d.properties.name);
+	svg3.selectAll("rect")
+		.on('mouseover', function(d){
+			id = $(this).attr("id");
+			tip.html(function(d){return id})
+			tip.show()
+			d3.select(this).attr("stroke", "#ECAB23").attr("stroke-opacity", 1).attr("stroke-width", 1)
 		})
 		.on('mouseout', function(d){
 			tip.hide()
 			d3.select(this).attr("stroke-opacity", 0)
-			//		$("#countryName").html("");
 		})
-	.on("click", function(d){
-		var year = d[0]
-		var companiesCount = time_region_zip[year].sum
-		var zipCount = time_region_zip[year].regions.length
-		var regionCount = time_region_zip[year].zipcodes.length
-		var active = Math.round(time_region_zip[year].active*100.00/companiesCount)
-	 $("#currentSelection").html("In <span style='color:#ECAB23'>"+year +"</span>, there were " +companiesCount + " new companies in "+ zipCount + " zipcodes from "+ regionCount + " countries <br/>"+active+"% are active.");
-	 //set current
-	 
-	 d3.select("#svgContainer3 svg").remove();
-	 drawHistogram(histogramData());
-	 d3.selectAll("rect").attr("fill", "#aaa")
-	 
-	 
-    var header = "<table style=\"width:800px\"><tr><td>Company Name</td><td>Zipcode</td><td>Jurisdiction</td></tr>"
-	var formattedCompanyText =  header+formatCompanyList(time_region_zip[year]["companies"])
-	
-	d3.selectAll("#companyList").html("<br/><br/>Companies Registered in the Year <span style='color:#ECAB23'>"+ year + "</span><br/><br/>"+ formattedCompanyText)
-	d3.selectAll("#detailMore").html("Show Companies")
-	
-	var numCompaniesZip = function(d){
-		//console.log(zip_region_counts[d.properties.postalCode])
-		if(zip_region_counts[d.properties.postalCode]){
-			var values = zip_region_counts[d.properties.postalCode].values
-			var count = 0;
-			for(var key in values) {
-				count += values[key]
+		.on("click", function(d){
+			//for updating the text outputs only
+			var year = d[0]
+			var companiesCount = time_region_zip[year].sum
+			var zipCount = time_region_zip[year].regions.length
+			var regionCount = time_region_zip[year].zipcodes.length
+			var active = Math.round(time_region_zip[year].active*100.00/companiesCount)
+			$("#currentSelection").html("In <span style='color:#ECAB23'>"+year +"</span>, there were " +companiesCount + " new companies in "+ zipCount + " zipcodes from "+ regionCount + " countries <br/>"+active+"% are active.");
+			//set current
+			d3.select("#svgContainer3 svg").remove();
+			drawHistogram(histogramData());
+			d3.selectAll("rect").attr("fill", "#aaa")
+			var header = "<table style=\"width:800px\"><tr><td>Company Name</td><td>Zipcode</td><td>Jurisdiction</td></tr>"
+			var formattedCompanyText =  header+formatCompanyList(time_region_zip[year]["companies"])
+			d3.selectAll("#companyList").html("<br/><br/>Companies Registered in the Year <span style='color:#ECAB23'>"+ year + "</span><br/><br/>"+ formattedCompanyText)
+			d3.selectAll("#detailMore").html("Show Companies")
+			var numCompaniesZip = function(d){
+			if(zip_region_counts[d.properties.postalCode]){
+				var values = zip_region_counts[d.properties.postalCode].values
+				var count = 0;
+				for(var key in values) {
+					count += values[key]
+				}
+				return count
+			} else {
+				return 0;
 			}
-			//console.log(name, count)
-			return count
-		} else {
-			return 0;
-		}
-	}
-	var colorScale = d3.scale.sqrt().domain([0, d3.max(nycJSON.features, numCompaniesZip)]).range(["#eee", "#ff2222"]); 
-	//var data = zip_region_counts[zipcode.toString()];
+			}
+			var colorScale = d3.scale.sqrt().domain([0, d3.max(nycJSON.features, numCompaniesZip)]).range(["#eee", "#ff2222"]); 
 
-	id = $(this).attr("id");
-	var year = id
-	var data = time_region_zip[id]
-
-		// Removes all of the country highlights
-		svg2.selectAll("path").attr("class","unmarked").attr("fill","#eee").transition().duration(200);
-		// Adds highlights back to the countries
-		data['regions'].forEach(function(d){
-			jurisdiction = d.split(" ").join("_");
+			id = $(this).attr("id");
+			var year = id
+			var data = time_region_zip[id]
+			// Removes all of the country highlights
+			svg2.selectAll("path").attr("class","unmarked").attr("fill","#eee").transition().duration(200);
+			// Adds highlights back to the countries
+			data['regions'].forEach(function(d){
+				jurisdiction = d.split(" ").join("_");
 			
-			if (jurisdiction.length !=0 && jurisdiction !=undefined){
-				var max = time_region_zip[year]['maxJurisdiction']
-				var currentRegionD = time_region_zip[year]['jurisdiction'][d]
-				var color = getCountryColor(max, currentRegionD);
-				svg2.select("#"+jurisdiction).attr("class","marked").transition().duration(200).attr("fill", color).attr("stroke",color);
-				//  $("#currentSelection").html("Companies in "+ zipcode + " are from > ");
-			} else{
-				svg2.select("#"+jurisdiction).attr("class","marked").transition().duration(200).attr("fill", "red").attr("stroke",color);
-			}
-		});
-
-		// Unhighlight all of the zip codes
-		var marked_zipcodes = svg1.selectAll(".marked");
-		if (marked_zipcodes.length > 0){
-			marked_zipcodes.each(function(d,i){
-				d3.select(this).attr("class","unmarked").attr("fill","#eee").transition().duration(200);
+				if (jurisdiction.length !=0 && jurisdiction !=undefined){
+					var max = time_region_zip[year]['maxJurisdiction']
+					var currentRegionD = time_region_zip[year]['jurisdiction'][d]
+					var color = getCountryColor(max, currentRegionD);
+					svg2.select("#"+jurisdiction).attr("class","marked").transition().duration(200).attr("fill", color).attr("stroke",color);
+					//  $("#currentSelection").html("Companies in "+ zipcode + " are from > ");
+				} else{
+					svg2.select("#"+jurisdiction).attr("class","marked").transition().duration(200).attr("fill", "red").attr("stroke",color);
+				}
 			});
-		}
-		// Update the highlights of the zip codes
-		data['zipcodes'].forEach(function(d){
-			zipcode = d
-			var max = time_region_zip[year]['maxZip']
-			var color = getZipcodeColor(max, time_region_zip[year]['values'][zipcode]);
-			svg1.select("#zip_"+d).attr("class","marked").transition().duration(200).attr("fill",color).attr("stroke", color);
+
+			// Unhighlight all of the zip codes
+			var marked_zipcodes = svg1.selectAll(".marked");
+			if (marked_zipcodes.length > 0){
+				marked_zipcodes.each(function(d,i){
+					d3.select(this).attr("class","unmarked").attr("fill","#eee").transition().duration(200);
+				});
+			}
+			// Update the highlights of the zip codes
+			data['zipcodes'].forEach(function(d){
+				zipcode = d
+				var max = time_region_zip[year]['maxZip']
+				var color = getZipcodeColor(max, time_region_zip[year]['values'][zipcode]);
+				svg1.select("#zip_"+d).attr("class","marked").transition().duration(200).attr("fill",color).attr("stroke", color);
+			})
+			
+			//for coloring histogram itself
+			svg3.selectAll("rect")
+			.attr("fill", function(d){ 
+				if(d[0]==id){
+					return "#ECAB23";
+				}else{
+					return "#aaa"
+				}
+			});
 		})
 		
-		
-		//console.log(histogramdata);
-		svg3.selectAll("rect")
-		.attr("fill", function(d){ 
-			if(d[0]==id){
-				return "#ECAB23";
-			}else{
-				return "#aaa"
-			}
-			
-		});
-	})
-	
-	
-	
 	var xAxis = d3.svg.axis().scale(yearscale).tickSize(1).ticks(16).tickFormat(d3.format("d"))
 	svg3.append("g")
 		.attr("class", "x axis")
