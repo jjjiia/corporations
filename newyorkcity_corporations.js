@@ -81,6 +81,10 @@ function bindHandlers(){
       drawWorld();
 	  drawHistogram(histogramData());
       initializeController();
+	  
+	  
+	 // renderMultipleYears(2010, 2010)
+	  
     }
 
 	function setProjection1() {
@@ -169,24 +173,37 @@ function drawHistogram(histogramdata){
 			d3.select(this).attr("stroke-opacity", 0)
 		})
 		.on("click", function(d){
+			id = $(this).attr("id");
+			
+			var yearStart = 1880
+			var yearEnd = id
+			
+			var data = renderMultipleYears(yearStart,yearEnd)
+			console.log(data)
+			if(yearStart == yearEnd){
+				var year = yearStart
+			}else{
+				var year = yearStart + " - " + yearEnd
+			}
+			
+			
 			//for updating the text outputs only
-			var year = d[0]
-			var companiesCount = time_region_zip[year].sum
-			var zipCount = time_region_zip[year].regions.length
-			var regionCount = time_region_zip[year].zipcodes.length
-			var active = Math.round(time_region_zip[year].active*100.00/companiesCount)
+			var companiesCount = data.sum
+			var zipCount = data.zipcodes.length
+			var regionCount = data.regions.length
+			var active = Math.round(data.active*100.00/companiesCount)
 			$("#currentSelection").html("In <span style='color:#ECAB23'>"+year +"</span>, there were " +companiesCount + " new companies in "+ zipCount + " zipcodes from "+ regionCount + " countries <br/>"+active+"% are active.");
 			//set current
 			d3.select("#svgContainer3 svg").remove();
 			drawHistogram(histogramData());
 			d3.selectAll("rect").attr("fill", "#aaa")
 			var header = "<table style=\"width:800px\"><tr><td>Company Name</td><td>Zipcode</td><td>Jurisdiction</td></tr>"
-			var formattedCompanyText =  header+formatCompanyList(time_region_zip[year]["companies"])
+			var formattedCompanyText =  header+formatCompanyList(data["companies"])
 			d3.selectAll("#companyList").html("<br/><br/>Companies Registered in the Year <span style='color:#ECAB23'>"+ year + "</span><br/><br/>"+ formattedCompanyText)
 			d3.selectAll("#detailMore").html("Show Companies")
 			var numCompaniesZip = function(d){
-			if(zip_region_counts[d.properties.postalCode]){
-				var values = zip_region_counts[d.properties.postalCode].values
+			if(data[d.properties.postalCode]){
+				var values = data[d.properties.postalCode].values
 				var count = 0;
 				for(var key in values) {
 					count += values[key]
@@ -197,26 +214,12 @@ function drawHistogram(histogramdata){
 			}
 			}
 			var colorScale = d3.scale.sqrt().domain([0, d3.max(nycJSON.features, numCompaniesZip)]).range(["#eee", "#ff2222"]); 
-
-			id = $(this).attr("id");
-			var year = id
-			var data = time_region_zip[id]
+			
 			// Removes all of the country highlights
 			svg2.selectAll("path").attr("class","unmarked").attr("fill","#eee").transition().duration(200);
-			// Adds highlights back to the countries
-			data['regions'].forEach(function(d){
-				jurisdiction = d.split(" ").join("_");
+			// Adds highlights back to the countries			
+			renderWorldMap(data)
 			
-				if (jurisdiction.length !=0 && jurisdiction !=undefined){
-					var max = time_region_zip[year]['maxJurisdiction']
-					var currentRegionD = time_region_zip[year]['jurisdiction'][d]
-					var color = getCountryColor(max, currentRegionD);
-					svg2.select("#"+jurisdiction).attr("class","marked").transition().duration(200).attr("fill", color).attr("stroke",color);
-					//  $("#currentSelection").html("Companies in "+ zipcode + " are from > ");
-				} else{
-					svg2.select("#"+jurisdiction).attr("class","marked").transition().duration(200).attr("fill", "red").attr("stroke",color);
-				}
-			});
 
 			// Unhighlight all of the zip codes
 			var marked_zipcodes = svg1.selectAll(".marked");
@@ -226,24 +229,19 @@ function drawHistogram(histogramdata){
 				});
 			}
 			// Update the highlights of the zip codes
-			data['zipcodes'].forEach(function(d){
-				zipcode = d
-				var max = time_region_zip[year]['maxZip']
-				var color = getZipcodeColor(max, time_region_zip[year]['values'][zipcode]);
-				svg1.select("#zip_"+d).attr("class","marked").transition().duration(200).attr("fill",color).attr("stroke", color);
-			})
+			renderUSMap(data)
 			
 			//for coloring histogram itself
 			svg3.selectAll("rect")
 			.attr("fill", function(d){ 
-				if(d[0]==id){
+				if(d[0]>=yearStart && d[0]<=yearEnd){
 					return "#ECAB23";
 				}else{
 					return "#aaa"
 				}
 			});
 		})
-		
+
 	var xAxis = d3.svg.axis().scale(yearscale).tickSize(1).ticks(16).tickFormat(d3.format("d"))
 	svg3.append("g")
 		.attr("class", "x axis")
@@ -257,6 +255,115 @@ function drawHistogram(histogramdata){
         .attr("transform", "translate(" + width + ",0)")
         .call(yAxis);	
 }
+function renderWorldMap(data){
+	data['regions'].forEach(function(d){
+		jurisdiction = d.split(" ").join("_");
+		if (jurisdiction == "COTE_D'IVOIRE"){
+			jurisdiction="COTE DIVOIRE"
+			console.log("TODO fix cote divoire!!")
+		}
+		
+		if (jurisdiction.length !=0 && jurisdiction !=undefined){
+			var max = data['maxJurisdiction']
+			var currentRegionD = data['jurisdiction'][d]
+			var color = getCountryColor(max, currentRegionD);
+			svg2.select("#"+jurisdiction).attr("class","marked").transition().duration(200).attr("fill", color).attr("stroke",color);
+			//  $("#currentSelection").html("Companies in "+ zipcode + " are from > ");
+		} else{
+			svg2.select("#"+jurisdiction).attr("class","marked").transition().duration(200).attr("fill", "red").attr("stroke",color);
+		}
+	});
+}
+function renderUSMap(data){
+	data['zipcodes'].forEach(function(d){
+		zipcode = d
+		var max = data['maxZip']
+		var color = getZipcodeColor(max, data['values'][zipcode]);
+		svg1.select("#zip_"+d).attr("class","marked").transition().duration(200).attr("fill",color).attr("stroke", color);
+	})
+}
+//histogram click handler for svg2-world
+function renderMultipleYears(yearStart, yearEnd){
+	// tally all years
+	var data = {}
+	data.zipcodes = []
+	data.regions = []
+	data.companies = []
+	data.maxJurisdiction = 0
+	data.maxZip = 0
+	data.sum = 0
+	data.active = 0
+	data["Not For Profit"]=0
+	data.values = {}
+	data.jurisdiction = {}
+	
+	for(var year = yearStart; year <= yearEnd; year++){
+		console.log( time_region_zip[year])
+		
+		if(time_region_zip[year]){
+			
+			var currentYearDataJurisdiction = time_region_zip[year]["jurisdiction"];
+			for(var jurisdiction in currentYearDataJurisdiction){
+				if(currentYearDataJurisdiction[jurisdiction]> data.maxJurisdiction){
+					data.maxJurisdiction = currentYearDataJurisdiction[jurisdiction]
+				}
+
+				if(data.regions.indexOf(jurisdiction)<0){
+					data.regions.push(jurisdiction)
+					console.log(jurisdiction)
+				}
+
+				if(data.jurisdiction[jurisdiction]){
+					data.jurisdiction[jurisdiction]=data.jurisdiction[jurisdiction]+currentYearDataJurisdiction[jurisdiction]
+					//console.log(jurisdiction)
+					//console.log(before,currentYearData[jurisdiction], data[jurisdiction])
+				}else{
+					data.jurisdiction[jurisdiction]= currentYearDataJurisdiction[jurisdiction]
+					//console.log(data[jurisdiction])
+				}
+			}
+		
+		
+			var currentYearDataZip = time_region_zip[year]["values"];
+			//console.log(currentYearData)
+			for(var zipcode in currentYearDataZip){
+			
+				if(currentYearDataZip[zipcode]> data.maxZip){
+					data.maxZip = currentYearDataZip[zipcode]
+				}
+				
+				if(data.zipcodes.indexOf(zipcode)<0){
+					data.zipcodes.push(zipcode)
+				}
+			
+				if(data.values[zipcode]){
+					data.values[zipcode]=data.values[zipcode]+currentYearDataZip[zipcode]
+					//console.log(jurisdiction)
+					//console.log(before,currentYearData[jurisdiction], data[jurisdiction])
+				}else{
+					data.values[zipcode]= currentYearDataZip[zipcode]
+					//console.log(data[jurisdiction])
+				}
+			}
+		
+		
+			data["Not For Profit"] = data["Not For Profit"] + time_region_zip[year]["Not For Profit"]
+			data.active = data.active + time_region_zip[year].active
+		
+			data.sum = data.sum + time_region_zip[year].sum
+			for(var company in time_region_zip[year].companies){
+				data.companies.push(time_region_zip[year].companies[company])
+			
+			}
+		
+		}
+	}
+	console.log(data.regions)
+	return data
+	//render on map
+	
+}
+
 
 
     function drawNYC(){
@@ -274,7 +381,6 @@ function drawHistogram(histogramdata){
 				return 0;
 			}
 		}
-
 		var colorScale = d3.scale.sqrt().domain([0, d3.max(nycJSON.features, numCompanies)]).range(["#eee", "#ff2222"]); 
 		svg1 = d3.select("#svgContainer1").append("svg")
 			.attr('height',$('#svgContainer1').height())
@@ -290,7 +396,6 @@ function drawHistogram(histogramdata){
 			.attr("class", "marked")
 			.attr("id", function(d){ 
 				id = "zip_" + d.properties.postalCode.toString();
-				//console.log("id "+id);
 				return id;
 			})
 			.attr("stroke-opacity", 0)
@@ -549,7 +654,7 @@ function drawHistogram(histogramdata){
 
     function getZipcodeColor(max,d){
       var tempScale = d3.scale.sqrt().domain([0, max]).range([1,10]);
-      var colorScale = d3.scale.log().range(["#fffefe", "#ff2222"]); 
+      var colorScale = d3.scale.log().range(["#fefefe", "#ff2222"]); 
       return colorScale(tempScale(d));
     }
 
