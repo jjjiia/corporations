@@ -90,13 +90,13 @@ function bindHandlers(){
 		 d3.select("#svgContainer3 svg").remove();
 		 drawHistogram(histogramData())
 	  })
-	  
-	playTimeline(10,1980)
+	playTimeline(10,1880)
     }
 
 	var playing = false
+	var timer;
+	
 	function playTimeline(sliderspan, startyear){
-		var timer;
 	  	var i = startyear
 	    var span = sliderspan
 		
@@ -106,12 +106,18 @@ function bindHandlers(){
 						  var data = renderMultipleYears(i, i+span)
 						  if(i < 2014 - span){
 							  i = i+1	
+							  renderSliderPosition(i, i+span)
+							  
 						  }else{
+							  playing = false
+							  clearInterval(timer);
+							  d3.select("#play").html("Play");
 							  i = 1880
 						  }
 						  renderWorldMap(data)
 	    		 		  renderUSMap(data)
-	    			  }, 10);
+						  
+	    			  }, 100);
 				  d3.select(this).html("Stop");
 				  playing = true
 			  }else{
@@ -120,6 +126,25 @@ function bindHandlers(){
 				  playing = false
 			  }
 		  });
+	}
+	
+	function renderSliderPosition(startingYear, endingYear){
+		var yearscale = YEARSCALE
+		var leftX = yearscale(startingYear)
+		var rightX = yearscale(endingYear)
+		
+		slider.attr("width", rightX-leftX)
+		slider.attr("x", leftX)
+		leftHandle.attr("x", leftX)
+		rightHandle.attr("x", rightX)
+		svg3.selectAll("rect.histoRects")
+		.attr("fill", function(d){ 
+			if(d[0]>=startingYear && d[0]<= endingYear){
+				return "#ECAB23";
+			}else{
+				return "#aaa"
+			}
+		});
 	}
 
 	function setProjection1() {
@@ -199,7 +224,10 @@ function dragged(d, e) {
   handle.attr("x", snappedX);
 
   d3.select(this).property("dragging-callback").run.apply(this)
-  
+   playing = false
+  d3.select("#play").html("Play");
+   
+   clearInterval(timer);
 }
 
 function dragended(d) {
@@ -208,12 +236,19 @@ function dragended(d) {
 
 var sliderDrag = d3.behavior.drag()
 
+var HISTOGRAM_WIDTH = 1000;
+var HISTOGRAM_HEIGHT = 120;
+
+var YEARSCALE = d3.scale.linear().domain([1880,2014]).range([20,HISTOGRAM_WIDTH]);
+var slider = null
+var leftHandle = null
+var rightHandle = null
 
 function drawHistogram(histogramdata){
-	var width = 1000
-	var height = 120
+	var width = HISTOGRAM_WIDTH
+	var height = HISTOGRAM_HEIGHT
+	var yearscale = YEARSCALE
 	var barwidth = width/(2014-1880)-2
-	var yearscale = d3.scale.linear().domain([1880,2014]).range([20,width]);
 	var yscale = d3.scale.log().domain([1,1050]).range([0,height-20]);
 	var y = d3.scale.log().domain([1,1050]).range([height-20,4]);
 	var barColorScale = d3.scale.linear().domain([0, height]).range(["#aaa", "#E1883B"]);
@@ -222,9 +257,6 @@ function drawHistogram(histogramdata){
 	  .offset([-10, 0])
     svg3 = d3.select("#svgContainer3").append("svg");
 
-	var slider = null
-	var leftHandle = null
-	var rightHandle = null
 
 	slider = svg3.append("rect")
 		.attr("x", 20)
