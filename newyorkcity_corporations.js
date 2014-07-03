@@ -97,11 +97,13 @@ function bindHandlers(){
 	var timer;
 	
 	function playTimeline(sliderspan, startyear){
-	  	var i = startyear
+	  	var i = startyear		
 	    var span = sliderspan
 		
 		d3.selectAll("#play").on("click", function(){
 			if(playing ==false){
+		 	   	i = YEARSCALE.invert(parseFloat(leftHandle.attr("x")))
+				
 					  timer = setInterval(function(){
 						  var data = renderMultipleYears(i, i+span)
 						  if(i < 2014 - span){
@@ -112,12 +114,11 @@ function bindHandlers(){
 							  playing = false
 							  clearInterval(timer);
 							  d3.select("#play").html("Play");
-							  i = 1880
 						  }
 						  renderWorldMap(data)
 	    		 		  renderUSMap(data)
 						  
-	    			  }, 100);
+	    			  }, 50);
 				  d3.select(this).html("Stop");
 				  playing = true
 			  }else{
@@ -137,6 +138,7 @@ function bindHandlers(){
 		slider.attr("x", leftX)
 		leftHandle.attr("x", leftX)
 		rightHandle.attr("x", rightX)
+		
 		svg3.selectAll("rect.histoRects")
 		.attr("fill", function(d){ 
 			if(d[0]>=startingYear && d[0]<= endingYear){
@@ -172,10 +174,6 @@ function bindHandlers(){
 	}
 
 
-//    function getColor(value){
-//      var color = d3.scale.linear().domain([0, 1]).range(["rgb(255,255,0)", "rgb(255,0,0)"]);
-//      return color(value);
-//    }
 function histogramData() {
 	var years = []
 	var timelinedata = []
