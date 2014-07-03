@@ -90,8 +90,37 @@ function bindHandlers(){
 		 d3.select("#svgContainer3 svg").remove();
 		 drawHistogram(histogramData())
 	  })
-
+	  
+	playTimeline(10,1980)
     }
+
+	var playing = false
+	function playTimeline(sliderspan, startyear){
+		var timer;
+	  	var i = startyear
+	    var span = sliderspan
+		
+		d3.selectAll("#play").on("click", function(){
+			if(playing ==false){
+					  timer = setInterval(function(){
+						  var data = renderMultipleYears(i, i+span)
+						  if(i < 2014 - span){
+							  i = i+1	
+						  }else{
+							  i = 1880
+						  }
+						  renderWorldMap(data)
+	    		 		  renderUSMap(data)
+	    			  }, 10);
+				  d3.select(this).html("Stop");
+				  playing = true
+			  }else{
+				  clearInterval(timer);
+				  d3.select(this).html("Play");
+				  playing = false
+			  }
+		  });
+	}
 
 	function setProjection1() {
 		projection.scale(1)

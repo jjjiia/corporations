@@ -90,8 +90,8 @@ a{
   border-left:solid 1px #ddd;
 }
 
-#svgContainer2 svg{
-
+#svgContainer3 svg{
+cursor:pointer;
 }
 #svgContainer3 {
 	width:1100px;
@@ -99,6 +99,7 @@ a{
 	position:absolute;
 	top:600px;
 	left:340px;
+	
 }
 #map-descp {
   font-size: 12px;
@@ -187,8 +188,11 @@ a{
 #essayBox-close{position:relative;float:right;}
 #essayBox-close2{position:relative;float:right;height:30px;}
 #detailMore{cursor: pointer;color:#000;position:relative;float:left;margin-left:30px;margin-top:-10px;height:40px;font-size:18px;}
-#resetAll{position:absolute;top:130px;left:1200px;color:#2DA1B3;text-shadow: 1px 1px 12px #2DA1B3;}
-
+#resetAll{position:absolute;top:130px;left:1200px;color:#2DA1B3;cursor:pointer;}
+#resetAll:hover{color:#2DA1B3;cursor:pointer;text-shadow: 1px 1px 12px #2DA1B3;}
+#resetAll:active{color:#E1883B;cursor:pointer;text-shadow: 1px 1px 12px #E1883B;}
+#play{position:absolute;top:580px;left:350px;color:#E1883B;cursor:pointer;}
+#stop{position:absolute;top:580px;left:380px;color:#E1883B;cursor:pointer;}
 
 .axis {
   shape-rendering: crispEdges;
