@@ -186,6 +186,7 @@ a{
 #essayBox-close{position:relative;float:right;}
 #essayBox-close2{position:relative;float:right;height:30px;}
 #detailMore{cursor: pointer;color:#000;position:relative;float:left;margin-left:30px;margin-top:-10px;height:40px;font-size:18px;}
+#resetAll{position:absolute;top:130px;left:1200px;color:#2DA1B3;text-shadow: 1px 1px 12px #2DA1B3;}
 
 
 .axis {

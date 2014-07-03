@@ -81,10 +81,16 @@ function bindHandlers(){
       drawWorld();
 	  drawHistogram(histogramData());
       initializeController();
-	  
-	  
-	 // renderMultipleYears(2010, 2010)
-	  
+
+	  d3.selectAll("#resetAll").on("click", function(){
+		  
+	  	 var data = renderMultipleYears(1880, 2013)
+		 renderWorldMap(data)
+		 renderUSMap(data)
+		 d3.select("#svgContainer3 svg").remove();
+		 drawHistogram(histogramData())
+	  })
+
     }
 
 	function setProjection1() {
@@ -160,7 +166,7 @@ function dragged(d, e) {
   }
 
   handle.attr("drag-x", x)
-  var snappedX = Math.floor(handle.attr("drag-x")/snapOffset)*snapOffset
+  var snappedX = x //Math.floor(handle.attr("drag-x")/snapOffset)*snapOffset
   handle.attr("x", snappedX);
 
   d3.select(this).property("dragging-callback").run.apply(this)
@@ -271,7 +277,7 @@ function drawHistogram(histogramdata){
 		.attr("drag-x", width)
 		
 		.attr("drag-start", 20)
-		.attr("drag-end", width)
+		.attr("drag-end", width + parseFloat(barwidth) - 1)
 		.attr("snap-offset", barwidth+2)
 		.attr("width", barwidth)
 		.attr("height", height-20)
@@ -286,6 +292,9 @@ function drawHistogram(histogramdata){
 				leftHandle.attr("drag-end", rightX)
 				var yearStart = Math.floor(yearscale.invert(leftX))
 				var yearEnd = Math.floor(yearscale.invert(rightX))
+
+				console.log(yearEnd)
+
 				var data = renderMultipleYears(yearStart,yearEnd)
 				renderWorldMap(data)
 				renderUSMap(data)
@@ -315,7 +324,7 @@ function drawHistogram(histogramdata){
 	    .attr("width",barwidth)
 		.attr("id", function(d){return d[0]})
 		.attr("fill", function(d){
-			return "#aaa"
+			return "#ECAB23"
 		})
 		.attr("height", function(d){return yscale(d[1])});
 
@@ -338,18 +347,9 @@ function drawHistogram(histogramdata){
 			var yearEnd = parseInt(id)
 			
 			var data = renderMultipleYears(yearStart,yearEnd)
-			//updateText(data)
-			//var colorScale = d3.scale.sqrt().domain([0, d3.max(nycJSON.features, numCompaniesZip)]).range(["#eee", "#ff2222"]); 
-			
-			// Removes all of the country highlights
-			// Adds highlights back to the countries			
-			renderWorldMap(data)
-			
 
-			// Unhighlight all of the zip codes
-			// Update the highlights of the zip codes
+			renderWorldMap(data)
 			renderUSMap(data)
-			
 			//for coloring histogram itself
 			svg3.selectAll("rect.histoRects")
 			.attr("fill", function(d){ 
@@ -411,7 +411,7 @@ function updateText(data, yearStart, yearEnd){
 	}
 }
 function renderWorldMap(data){
-	svg2.selectAll("path").attr("class","unmarked").attr("fill","#eee").transition().duration(200);
+	svg2.selectAll("path").attr("class","unmarked").attr("fill","#eee").transition().duration(600);
 	
 	data['regions'].forEach(function(d){
 		jurisdiction = d.split(" ").join("_");
@@ -424,20 +424,20 @@ function renderWorldMap(data){
 			var max = data['maxJurisdiction']
 			var currentRegionD = data['jurisdiction'][d]
 			var color = getCountryColor(max, currentRegionD);
-			svg2.select("#"+jurisdiction).attr("class","marked").transition().duration(200).attr("fill", color).attr("stroke",color);
+			svg2.select("#"+jurisdiction).attr("class","marked").attr("fill", color).attr("stroke",color).transition().duration(600);
 			//  $("#currentSelection").html("Companies in "+ zipcode + " are from > ");
 		} else{
-			svg2.select("#"+jurisdiction).attr("class","marked").transition().duration(200).attr("fill", "red").attr("stroke",color);
+			svg2.select("#"+jurisdiction).attr("class","marked").attr("fill", "red").attr("stroke",color).transition().duration(600);
 		}
 	});
 }
 function renderUSMap(data){
-	svg1.selectAll("path").attr("fill","#eee").transition().duration(200);
+	svg1.selectAll("path").attr("fill","#eee").transition().duration(600);
 	data['zipcodes'].forEach(function(d){
 		zipcode = d
 		var max = data['maxZip']
 		var color = getZipcodeColor(1000, data['values'][zipcode]);
-		svg1.select("#zip_"+d).attr("class","marked").transition().duration(200).attr("fill",color).attr("stroke", color);
+		svg1.select("#zip_"+d).attr("class","marked").attr("fill",color).attr("stroke", color).transition().duration(600);
 	})
 }
 //histogram click handler for svg2-world
