@@ -91,13 +91,19 @@ function renderMap(data, selector) {
 		.data(data.features)
 		.enter().append("path")
 		.attr("d", path)
+		.attr("class", "map-item")
 		.attr("cursor", "pointer");
 
 	return map
 }
 
-function renderNycMap(paths, data) {
+function initNycMap(paths, data) {
 	var map = renderMap(paths, "#svg-nyc-map")
+	renderNycMap(data)
+}
+
+function renderNycMap(data) {
+	var map = d3.select("#svg-nyc-map").selectAll(".map-item")
 
 	var companiesByZipcode = table.group(data, ["zipcode"])
 	var largest = table.maxCount(companiesByZipcode)
@@ -120,8 +126,13 @@ function renderNycMap(paths, data) {
 	return map
 }
 
-function renderWorldMap(paths, data) {
+function initWorldMap(paths, data) {
 	var map = renderMap(paths, "#svg-world-map")
+	renderWorldMap(data)
+}
+
+function renderWorldMap(data) {
+	var map = d3.select("#svg-world-map").selectAll(".map-item")
 
 	var companiesByJurisdiction = table.group(data, ["jurisdiction"])
 	var largest = table.maxCount(companiesByJurisdiction)
@@ -191,7 +202,6 @@ function renderTimeline(data) {
 		// TODO: Fix the widths...
 		.attr("width", 5)
 		.attr("fill", function(d) {
-			// return "#ECAB23"
 			return "#AAA"
 		})
 		.attr("height", function(d) {
@@ -201,13 +211,21 @@ function renderTimeline(data) {
 			} else {
 				return yScaleFlipped(a.length)
 			}
-		});
+		})
+		.on("click", function(d) {
+			timeline.select(".selected-year").classed("selected-year", false)
+			d3.select(this).classed("selected-year", true)
+
+			var data = companiesByYear[d]
+			renderNycMap(data)
+			renderWorldMap(data)
+		})
 }
 
 function dataDidLoad(error, nycPaths, worldPaths, data) {
 	window.data = data
-	var nycMap = renderNycMap(nycPaths, data)
-	var worldMap = renderWorldMap(worldPaths, data)
+	var nycMap = initNycMap(nycPaths, data)
+	var worldMap = initWorldMap(worldPaths, data)
 	var timeline = renderTimeline(data)
 }
 
