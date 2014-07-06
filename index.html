@@ -36,6 +36,17 @@
 	fill:#ECAB23;
 }
 
+#timeline-controls {
+	font-size:30px;
+	color:purple;
+	background-color:pink;
+	cursor:pointer;
+}
+
+#timeline-controls .stop {
+	display:none;
+}
+
 </style>
 
 <body>
@@ -46,6 +57,11 @@
 		<div id="svg-nyc-map"></div>
 		<div id="svg-world-map"></div>
 		<div id="svg-timeline"></div>
+	</div>
+
+	<div id="timeline-controls">
+		<p class="play">Play</p>
+		<p class="stop">Stop</p>
 	</div>
 
 	  <script src="index.js"></script>

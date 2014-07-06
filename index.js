@@ -1,6 +1,12 @@
 
 var config = {
-	zoom: 0.95
+	zoom: 0.95,
+	timeline: {
+		width: 1100,
+		barWidth: 5,
+		// TODO: Update this and remove this "magic" constant for the width '1100'
+		xScale: d3.scale.linear().domain([1880,2014]).range([20, 1100 - 100])
+	}
 }
 
 var global = {
@@ -192,6 +198,73 @@ function renderWorldMap(data) {
 	return map
 }
 
+
+
+// TODO: Rename these functions so they are in some sort of "timeline" namespace
+
+function leftHandlePosition() {
+	return parseFloat(d3.select("#svg-timeline").select(".handle-left").attr("x"))
+}
+
+function rightHandlePosition() {
+	return parseFloat(d3.select("#svg-timeline").select(".handle-right").attr("x"))
+}
+
+function updateSliderRange(startYear, endYear) {
+	var xScale = config.timeline.xScale
+
+	var startX = xScale(startYear)
+	var endX = xScale(endYear)
+
+	var slider = d3.select("#svg-timeline .slider")
+	slider.attr("width", endX - startX)
+	slider.attr("x", startX)
+
+	updateHandleLocations()
+}
+
+function updateSliderLocation() {
+	var startX = leftHandlePosition()
+	var endX = rightHandlePosition()
+
+	var slider = d3.select("#svg-timeline .slider")
+	slider.attr("width", endX - startX)
+	slider.attr("x", startX)
+}
+
+function updateHandleLocations() {
+	var leftHandle = d3.select("#svg-timeline .handle-left")
+	var rightHandle = d3.select("#svg-timeline .handle-right")
+
+	var slider = d3.select("#svg-timeline .slider")
+	var startX = parseFloat(slider.attr("x")) - config.timeline.barWidth
+	var endX = parseFloat(slider.attr("x")) + parseFloat(slider.attr("width"))
+
+	leftHandle.attr("x", startX)
+	rightHandle.attr("x", endX)
+}
+
+function updateMaps() {
+	var xScale = config.timeline.xScale
+
+	var startYear = Math.floor(xScale.invert(leftHandlePosition()))
+	var endYear = Math.floor(xScale.invert(rightHandlePosition()))
+
+	var slider = d3.select("#svg-timeline .slider")
+	slider.property("timeline-year-start", startYear)
+	slider.property("timeline-year-end", endYear)
+
+	var data = table.filter(table.group(global.data, ["birthyear"]), function(list, year) {
+		year = parseFloat(year)
+		return (year >= startYear && year <= endYear)
+	})
+
+	renderNycMap(data)
+	renderWorldMap(data)
+	renderTimeline(global.data)
+}
+
+
 function initTimeline(data) {
 	// TODO: Move this into CSS just like above.
 	var height = 150
@@ -203,7 +276,7 @@ function initTimeline(data) {
 
 	// Render the Axes for the timeline
 
-	var xScale = d3.scale.linear().domain([1880,2014]).range([20,width]);
+	var xScale = config.timeline.xScale
 	var yScale = d3.scale.log().domain([1,1050]).range([height-20,4]);
 
 	var xAxis = d3.svg.axis().scale(xScale).tickSize(1).ticks(16).tickFormat(d3.format("d"))
@@ -221,48 +294,7 @@ function initTimeline(data) {
 
 	// Add the sliders
 
-	var barwidth = 5
-
-
-	function leftHandlePosition() {
-		return parseFloat(d3.select("#svg-timeline").select(".handle-left").attr("x"))
-	}
-	
-	function rightHandlePosition() {
-		return parseFloat(d3.select("#svg-timeline").select(".handle-right").attr("x"))
-	}
-
-	function updateSliderLocation() {
-		var startX = leftHandlePosition()
-		var endX = rightHandlePosition()
-		slider.attr("width", endX - startX)
-		slider.attr("x", startX)
-	}
-
-	function updateHandleLocations() {
-		var startX = parseFloat(slider.attr("x")) - barwidth
-		var endX = parseFloat(slider.attr("x")) + parseFloat(slider.attr("width"))
-
-		leftHandle.attr("x", startX)
-		rightHandle.attr("x", endX)
-	}
-
-	function updateMaps() {
-		var startYear = Math.floor(xScale.invert(leftHandlePosition()))
-		var endYear = Math.floor(xScale.invert(rightHandlePosition()))
-
-		slider.property("timeline-year-start", startYear)
-		slider.property("timeline-year-end", endYear)
-
-		var data = table.filter(table.group(global.data, ["birthyear"]), function(list, year) {
-			year = parseFloat(year)
-			return (year >= startYear && year <= endYear)
-		})
-
-		renderNycMap(data)
-		renderWorldMap(data)
-		renderTimeline(global.data)
-	}
+	var barwidth = config.timeline.barWidth
 
 	var slider = timeline.append("rect")
 		.attr("class", "slider")
@@ -431,6 +463,38 @@ function dataDidLoad(error, nycPaths, worldPaths, data) {
 	var nycMap = initNycMap(nycPaths, data)
 	var worldMap = initWorldMap(worldPaths, data)
 	var timeline = initTimeline(data)
+
+	var timer = null
+
+	$("#timeline-controls .play").click(function() {
+		$("#timeline-controls .play").hide()
+		$("#timeline-controls .stop").show()
+
+		var direction = 1
+		var year = 1880
+		timer = setInterval(function() {
+			updateSliderRange(year, year + 10)
+			updateMaps()
+
+			if(year + 10 == 2014 && direction == 1) {
+				direction = -1
+			}
+				
+			if(year == 1880 && direction == -1) {
+				direction = 1
+			}
+
+			year = year + direction
+
+		}, 100)
+	})
+
+	$("#timeline-controls .stop").click(function() {
+		$("#timeline-controls .play").show()
+		$("#timeline-controls .stop").hide()
+
+		clearInterval(timer)
+	})
 }
 
 $(function() {
