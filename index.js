@@ -2,6 +2,7 @@
 var config = {
 	zoom: 0.95,
 	timeline: {
+		timer: null,
 		width: 1100,
 		barWidth: 5,
 		// TODO: Update this and remove this "magic" constant for the width '1100'
@@ -310,6 +311,8 @@ function initTimeline(data) {
 				d3.select(this).property("drag-offset-x", d3.event.sourceEvent.x - this.getBoundingClientRect().left)
 			})
 			.on("drag", function(d, e) {
+				timelineControlStop()
+
 				var x = d3.event.x - d3.select(this).property("drag-offset-x")
 				var w = parseFloat(d3.select(this).attr("width"))
 
@@ -340,6 +343,8 @@ function initTimeline(data) {
 				d3.event.sourceEvent.stopPropagation();
 			})
 			.on("drag", function() {
+				timelineControlStop()
+
 				var x = d3.event.x - (d3.select(this).attr("width") / 2)
 				
 				if(x <= 20) {
@@ -370,6 +375,8 @@ function initTimeline(data) {
 				d3.event.sourceEvent.stopPropagation();
 			})
 			.on("drag", function() {
+				timelineControlStop()
+
 				var x = d3.event.x - (d3.select(this).attr("width") / 2)
 
 				if(x <= leftHandlePosition()) {
@@ -455,6 +462,13 @@ function renderTimeline(data) {
 		})
 }
 
+function timelineControlStop() {
+	$("#timeline-controls .play").show()
+	$("#timeline-controls .stop").hide()
+
+	clearInterval(config.timeline.timer)
+}
+
 function dataDidLoad(error, nycPaths, worldPaths, data) {
 	global.nycPaths = nycPaths
 	global.worldPaths = worldPaths
@@ -464,15 +478,13 @@ function dataDidLoad(error, nycPaths, worldPaths, data) {
 	var worldMap = initWorldMap(worldPaths, data)
 	var timeline = initTimeline(data)
 
-	var timer = null
-
 	$("#timeline-controls .play").click(function() {
 		$("#timeline-controls .play").hide()
 		$("#timeline-controls .stop").show()
 
 		var direction = 1
-		var year = 1880
-		timer = setInterval(function() {
+		var year = Math.floor(config.timeline.xScale.invert(leftHandlePosition()))
+		config.timeline.timer = setInterval(function() {
 			updateSliderRange(year, year + 10)
 			updateMaps()
 
@@ -489,12 +501,7 @@ function dataDidLoad(error, nycPaths, worldPaths, data) {
 		}, 100)
 	})
 
-	$("#timeline-controls .stop").click(function() {
-		$("#timeline-controls .play").show()
-		$("#timeline-controls .stop").hide()
-
-		clearInterval(timer)
-	})
+	$("#timeline-controls .stop").click(timelineControlStop)
 }
 
 $(function() {
