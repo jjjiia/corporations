@@ -3,6 +3,12 @@ var config = {
 	zoom: 0.95
 }
 
+var global = {
+	data: null,
+	nycPaths: null,
+	worldPaths: null
+}
+
 var utils = {
 	range: function(start, end) {
 		var data = []
@@ -122,6 +128,15 @@ function renderNycMap(data) {
 		.attr("stroke", colorScale)
 		.attr("fill-opacity", 1)
 		.attr("fill", colorScale)
+		.on("click", function(d) {
+			renderNycMap(global.data)
+
+			var companiesByZipcode = table.group(data, ["zipcode"])
+			var zipcode = d.properties.postalCode
+			var newData = companiesByZipcode[zipcode]
+			renderWorldMap(newData)
+			renderTimeline(newData)
+		})
 
 	return map
 }
@@ -151,22 +166,29 @@ function renderWorldMap(data) {
 		.attr("stroke", colorScale)
 		.attr("fill-opacity", 1)
 		.attr("fill", colorScale)
+		.on("click", function(d) {
+			renderWorldMap(global.data)
+
+			var companiesByJurisdiction = table.group(global.data, ["jurisdiction"])
+			var jurisdiction = d.properties.name.toUpperCase()
+			var newData = companiesByJurisdiction[jurisdiction]
+			renderNycMap(newData)
+			renderTimeline(newData)
+		})
 
 	return map
 }
 
-function renderTimeline(data) {
-	// TODO: Move this into CSS just like above
+function initTimeline(data) {
+	// TODO: Move this into CSS just like above.
 	var height = 150
 	var width = 1100 - 100
 
 	var timeline = d3.select("#svg-timeline").append("svg");
 
-
 	// Render the Axes for the timeline
 	var xScale = d3.scale.linear().domain([1880,2014]).range([20,width]);
 	var yScale = d3.scale.log().domain([1,1050]).range([height-20,4]);
-	var yScaleFlipped = d3.scale.log().domain([1,1050]).range([4, height-20]);
 
 	var xAxis = d3.svg.axis().scale(xScale).tickSize(1).ticks(16).tickFormat(d3.format("d"))
 	var yAxis = d3.svg.axis().scale(yScale).tickSize(1).orient("right").tickFormat(d3.format("d")).tickValues([1, 10, 100,1000]);
@@ -180,17 +202,32 @@ function renderTimeline(data) {
 		.call(yAxis);
 
 
-	// Render the actual bars
-	var companiesByYear = table.group(data, ["birthyear"])
-
-
+	// Add all of the histogram vertical bars
 	timeline.selectAll("rect")
 		.data(utils.range(1880, 2014))
 		.enter()
 		.append("rect")
+		.attr("class", "timeline-item")
 	    .attr("x", function(d) {
 			return xScale(d)
 		})
+
+	renderTimeline(data)
+}
+
+function renderTimeline(data) {
+	// TODO: Move this into CSS just like above.
+	var height = 150
+	var width = 1100 - 100
+
+	var yScaleFlipped = d3.scale.log().domain([1,1050]).range([4, height-20]);
+
+	// Render the actual bars
+	var companiesByYear = table.group(data, ["birthyear"])
+
+	var timeline = d3.select("#svg-timeline").selectAll(".timeline-item")
+
+	timeline
 	    .attr("y", function(d) {
 			var a = companiesByYear[d]
 			if(!a) {
@@ -213,20 +250,26 @@ function renderTimeline(data) {
 			}
 		})
 		.on("click", function(d) {
-			timeline.select(".selected-year").classed("selected-year", false)
+			d3.select("#svg-timeline .selected-year").classed("selected-year", false)
 			d3.select(this).classed("selected-year", true)
 
-			var data = companiesByYear[d]
-			renderNycMap(data)
-			renderWorldMap(data)
+			renderTimeline(global.data)
+
+			var companiesByYear = table.group(global.data, ["birthyear"])
+			var newData = companiesByYear[d]
+			renderNycMap(newData)
+			renderWorldMap(newData)
 		})
 }
 
 function dataDidLoad(error, nycPaths, worldPaths, data) {
-	window.data = data
+	global.nycPaths = nycPaths
+	global.worldPaths = worldPaths
+	global.data = data
+	
 	var nycMap = initNycMap(nycPaths, data)
 	var worldMap = initWorldMap(worldPaths, data)
-	var timeline = renderTimeline(data)
+	var timeline = initTimeline(data)
 }
 
 $(function() {
