@@ -72,6 +72,19 @@ var table = {
 			name: largestName,
 			count: largestCount
 		}
+	},
+
+	filter: function(view, callback) {
+		var data = []
+
+		for(var i in view) {
+			var list = view[i]
+			if(callback(list, i)) {
+				data = data.concat(list)
+			}
+		}
+
+		return data
 	}
 }
 
@@ -234,6 +247,23 @@ function initTimeline(data) {
 		rightHandle.attr("x", endX)
 	}
 
+	function updateMaps() {
+		var startYear = Math.floor(xScale.invert(leftHandlePosition()))
+		var endYear = Math.floor(xScale.invert(rightHandlePosition()))
+
+		slider.property("timeline-year-start", startYear)
+		slider.property("timeline-year-end", endYear)
+
+		var data = table.filter(table.group(global.data, ["birthyear"]), function(list, year) {
+			year = parseFloat(year)
+			return (year >= startYear && year <= endYear)
+		})
+
+		renderNycMap(data)
+		renderWorldMap(data)
+		renderTimeline(global.data)
+	}
+
 	var slider = timeline.append("rect")
 		.attr("class", "slider")
 		.attr("x", 20)
@@ -261,6 +291,7 @@ function initTimeline(data) {
 
 				d3.select(this).attr("x", x)
 				updateHandleLocations()
+				updateMaps()
 			})
 		)
 
@@ -290,6 +321,7 @@ function initTimeline(data) {
 
 				d3.select(this).attr("x", x)
 				updateSliderLocation()
+				updateMaps()
 			})
 		)
 
@@ -318,6 +350,7 @@ function initTimeline(data) {
 
 				d3.select(this).attr("x", x)
 				updateSliderLocation()
+				updateMaps()
 			})
 		)
 
@@ -360,7 +393,14 @@ function renderTimeline(data) {
 		// TODO: Fix the widths...
 		.attr("width", 5)
 		.attr("fill", function(d) {
-			return "#AAA"
+			var startYear = d3.select("#svg-timeline .slider").property("timeline-year-start")
+			var endYear = d3.select("#svg-timeline .slider").property("timeline-year-end")
+
+			if(d <= startYear || d >= endYear) {
+				return "#AAA"
+			} else {
+				return "#ECAB23"
+			}
 		})
 		.attr("height", function(d) {
 			var a = companiesByYear[d]
