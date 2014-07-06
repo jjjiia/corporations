@@ -186,7 +186,10 @@ function initTimeline(data) {
 
 	var timeline = d3.select("#svg-timeline").append("svg");
 
+
+
 	// Render the Axes for the timeline
+
 	var xScale = d3.scale.linear().domain([1880,2014]).range([20,width]);
 	var yScale = d3.scale.log().domain([1,1050]).range([height-20,4]);
 
@@ -202,7 +205,125 @@ function initTimeline(data) {
 		.call(yAxis);
 
 
+
+	// Add the sliders
+
+	var barwidth = 5
+
+
+	function leftHandlePosition() {
+		return parseFloat(d3.select("#svg-timeline").select(".handle-left").attr("x"))
+	}
+	
+	function rightHandlePosition() {
+		return parseFloat(d3.select("#svg-timeline").select(".handle-right").attr("x"))
+	}
+
+	function updateSliderLocation() {
+		var startX = leftHandlePosition()
+		var endX = rightHandlePosition()
+		slider.attr("width", endX - startX)
+		slider.attr("x", startX)
+	}
+
+	function updateHandleLocations() {
+		var startX = parseFloat(slider.attr("x")) - barwidth
+		var endX = parseFloat(slider.attr("x")) + parseFloat(slider.attr("width"))
+
+		leftHandle.attr("x", startX)
+		rightHandle.attr("x", endX)
+	}
+
+	var slider = timeline.append("rect")
+		.attr("class", "slider")
+		.attr("x", 20)
+		.attr("y", 0)
+		.attr("width", width-20)
+		.attr("height", height-20)
+		.attr("fill", "#E1883B")
+		.attr("opacity", 0.1)
+		.call(d3.behavior.drag()
+			.on("dragstart", function() {
+				d3.event.sourceEvent.stopPropagation();
+				d3.select(this).property("drag-offset-x", d3.event.sourceEvent.x - this.getBoundingClientRect().left)
+			})
+			.on("drag", function(d, e) {
+				var x = d3.event.x - d3.select(this).property("drag-offset-x")
+				var w = parseFloat(d3.select(this).attr("width"))
+
+				if(x <= 20) {
+					x = 20
+				}
+
+				if((x + w) >= width) {
+					x = width - w
+				}
+
+				d3.select(this).attr("x", x)
+				updateHandleLocations()
+			})
+		)
+
+	var leftHandle = timeline.append("rect")
+		.attr("class", "handle-left")
+		.attr("x", 20)
+		.attr("y", 0)
+		.attr("width", barwidth)
+		.attr("height", height-20)
+		.attr("fill", "#E1883B")
+		.attr("opacity", 0.3)
+		.call(d3.behavior.drag()
+			.on("dragstart", function() {
+				d3.event.sourceEvent.stopPropagation();
+			})
+			.on("drag", function() {
+				var x = d3.event.x - (d3.select(this).attr("width") / 2)
+				
+				if(x <= 20) {
+					x = 20
+				}
+
+				if(x >= rightHandlePosition()) {
+					x = rightHandlePosition()
+				}
+				
+
+				d3.select(this).attr("x", x)
+				updateSliderLocation()
+			})
+		)
+
+	var rightHandle = timeline.append("rect")
+		.attr("class", "handle-right")
+		.attr("x", width)
+		.attr("y", 0)
+		.attr("width", barwidth)
+		.attr("height", height-20)
+		.attr("fill", "#E1883B")
+		.attr("opacity", 0.3)
+		.call(d3.behavior.drag()
+			.on("dragstart", function() {
+				d3.event.sourceEvent.stopPropagation();
+			})
+			.on("drag", function() {
+				var x = d3.event.x - (d3.select(this).attr("width") / 2)
+
+				if(x <= leftHandlePosition()) {
+					x = leftHandlePosition()
+				}
+
+				if(x >= width) {
+					x = width
+				}
+
+				d3.select(this).attr("x", x)
+				updateSliderLocation()
+			})
+		)
+
+
 	// Add all of the histogram vertical bars
+
 	timeline.selectAll("rect")
 		.data(utils.range(1880, 2014))
 		.enter()
