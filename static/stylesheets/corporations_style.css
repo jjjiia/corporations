@@ -193,7 +193,7 @@ cursor:pointer;
 #resetAll:hover{color:#2DA1B3;cursor:pointer;text-shadow: 1px 1px 12px #2DA1B3;}
 #resetAll:active{color:#E1883B;cursor:pointer;text-shadow: 1px 1px 12px #E1883B;}
 
-#play{position:absolute;top:580px;left:350px;color:#E1883B;cursor:pointer;}
+#play{position:absolute;top:580px;left:360px;color:#E1883B;cursor:pointer;font-size:14px;}
 #play:hover{color:#E1883B;cursor:pointer;text-shadow: 1px 1px 12px #E1883B;}
 #play:active{color:#E1883B;cursor:pointer;text-shadow: 1px 1px 12px #E1883B;}
 
