@@ -3,6 +3,18 @@ var config = {
 	zoom: 0.95
 }
 
+var utils = {
+	range: function(start, end) {
+		var data = []
+
+		for (var i = start; i < end; i++) {
+			data.push(i)
+		}
+
+		return data
+	}
+}
+
 var table = {
 	group: function(rows, fields) {
 		var view = {}
@@ -132,10 +144,71 @@ function renderWorldMap(paths, data) {
 	return map
 }
 
+function renderTimeline(data) {
+	// TODO: Move this into CSS just like above
+	var height = 150
+	var width = 1100 - 100
+
+	var timeline = d3.select("#svg-timeline").append("svg");
+
+
+	// Render the Axes for the timeline
+	var xScale = d3.scale.linear().domain([1880,2014]).range([20,width]);
+	var yScale = d3.scale.log().domain([1,1050]).range([height-20,4]);
+	var yScaleFlipped = d3.scale.log().domain([1,1050]).range([4, height-20]);
+
+	var xAxis = d3.svg.axis().scale(xScale).tickSize(1).ticks(16).tickFormat(d3.format("d"))
+	var yAxis = d3.svg.axis().scale(yScale).tickSize(1).orient("right").tickFormat(d3.format("d")).tickValues([1, 10, 100,1000]);
+
+	timeline.append("g")
+		.attr("transform", "translate(0," + (height-20) + ")")
+		.call(xAxis);
+
+	timeline.append("g")
+		.attr("transform", "translate(" + (width) + ",0)")
+		.call(yAxis);
+
+
+	// Render the actual bars
+	var companiesByYear = table.group(data, ["birthyear"])
+
+
+	timeline.selectAll("rect")
+		.data(utils.range(1880, 2014))
+		.enter()
+		.append("rect")
+	    .attr("x", function(d) {
+			return xScale(d)
+		})
+	    .attr("y", function(d) {
+			var a = companiesByYear[d]
+			if(!a) {
+				return 0
+			} else {
+				return height - 20 - yScaleFlipped(a.length)
+			}
+		})
+		// TODO: Fix the widths...
+		.attr("width", 5)
+		.attr("fill", function(d) {
+			// return "#ECAB23"
+			return "#AAA"
+		})
+		.attr("height", function(d) {
+			var a = companiesByYear[d]
+			if(!a) {
+				return 0;
+			} else {
+				return yScaleFlipped(a.length)
+			}
+		});
+}
+
 function dataDidLoad(error, nycPaths, worldPaths, data) {
 	window.data = data
 	var nycMap = renderNycMap(nycPaths, data)
 	var worldMap = renderWorldMap(worldPaths, data)
+	var timeline = renderTimeline(data)
 }
 
 $(function() {
