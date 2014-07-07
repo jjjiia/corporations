@@ -155,6 +155,8 @@ function renderNycMap(data) {
 			var zipcode = d.properties.postalCode
 			var newData = companiesByZipcode[zipcode]
 			resetAll()
+			var newDataStartEndYears = dateRangeForSelection(newData)
+			updateSliderRange(newDataStartEndYears[0],newDataStartEndYears[1])
 			renderWorldMap(newData)
 			renderTimeline(newData)
 		})
@@ -194,13 +196,26 @@ function renderWorldMap(data) {
 			var companiesByJurisdiction = table.group(global.data, ["jurisdiction"])
 			var jurisdiction = d.properties.name.toUpperCase()
 			var newData = companiesByJurisdiction[jurisdiction]
-
+			
 			resetAll()
+			var newDataStartEndYears = dateRangeForSelection(newData)
+			updateSliderRange(newDataStartEndYears[0],newDataStartEndYears[1])
 			renderNycMap(newData)
 			renderTimeline(newData)
 		})
-
 	return map
+}
+
+//determine daterange for map selection
+function dateRangeForSelection(selectedData){
+	var selectedDataByTime = table.group(selectedData, ["birthyear"])
+	
+	var toSort = []
+	for(var items in selectedDataByTime){
+		toSort.push([items])
+	}
+	var output = toSort.sort(function(a, b) {return a[0] - b[0]})
+	return [parseInt(output[0]), parseInt(output[output.length-1])]
 }
 
 //reset all button
@@ -272,10 +287,12 @@ function updateMaps() {
 		year = parseFloat(year)
 		return (year >= startYear && year <= endYear)
 	})
+	
+	
 	d3.select("#svg-timeline .selected-year").classed("selected-year", false)
 	renderNycMap(data)
 	renderWorldMap(data)
-	renderTimeline(global.data)
+	renderTimeline(data)
 }
 
 //original function
