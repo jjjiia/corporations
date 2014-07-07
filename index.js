@@ -1,3 +1,4 @@
+//TODO: fix when zipcode or country has no companies
 
 var config = {
 	zoom: 0.95,
@@ -14,6 +15,11 @@ var global = {
 	data: null,
 	nycPaths: null,
 	worldPaths: null
+}
+//put currentSelection in to global
+var currentSelection = {
+	zipcode: null,
+	jurisdiction: null
 }
 
 var utils = {
@@ -95,6 +101,7 @@ var table = {
 	}
 }
 
+
 function renderMap(data, selector) {
 	// TODO: Move to CSS
 	var width = 500
@@ -149,12 +156,19 @@ function renderNycMap(data) {
 		.attr("fill-opacity", 1)
 		.attr("fill", colorScale)
 		.on("click", function(d) {
-			renderNycMap(global.data)
-			d3.select(this).attr("fill", "black")
 			var companiesByZipcode = table.group(data, ["zipcode"])
 			var zipcode = d.properties.postalCode
+			
+			currentSelection.zipcode = zipcode
+			currentSelection.jurisdiction = null
+			console.log("test ",currentSelection.zipcode)
+			
 			var newData = companiesByZipcode[zipcode]
-			resetAll()
+			updateSliderRange(1880, 2014);
+			updateMaps();
+			
+			renderNycMap(global.data)
+			d3.select(this).attr("fill", "black")
 			var newDataStartEndYears = dateRangeForSelection(newData)
 			updateSliderRange(newDataStartEndYears[0],newDataStartEndYears[1])
 			renderWorldMap(newData)
@@ -190,16 +204,23 @@ function renderWorldMap(data) {
 		.attr("fill-opacity", 1)
 		.attr("fill", colorScale)
 		.on("click", function(d) {
-			renderWorldMap(global.data)
-			d3.select(this).attr("fill", "black")
 			
 			var companiesByJurisdiction = table.group(global.data, ["jurisdiction"])
 			var jurisdiction = d.properties.name.toUpperCase()
 			var newData = companiesByJurisdiction[jurisdiction]
 			
-			resetAll()
+			currentSelection.jurisdiction = jurisdiction
+			currentSelection.zipcode = null
+			console.log("test ",currentSelection.jurisdiction)
+			
+			updateSliderRange(1880, 2014);
+			updateMaps();
+
 			var newDataStartEndYears = dateRangeForSelection(newData)
 			updateSliderRange(newDataStartEndYears[0],newDataStartEndYears[1])
+
+			renderWorldMap(global.data)
+			d3.select(this).attr("fill", "black")
 			renderNycMap(newData)
 			renderTimeline(newData)
 		})
@@ -224,6 +245,8 @@ d3.select("#resetAll")
 	resetAll()})
 
 function resetAll(){
+	currentSelection.jurisdiction = null;
+	currentSelection.zipcode = null;
 	updateSliderRange(1880, 2014);
 	updateMaps();
 }
@@ -277,22 +300,45 @@ function updateMaps() {
 
 	var startYear = Math.floor(xScale.invert(leftHandlePosition()))
 	var endYear = Math.floor(xScale.invert(rightHandlePosition()))
-
+	
 	var slider = d3.select("#svg-timeline .slider")
 	slider.property("timeline-year-start", startYear)
 	slider.property("timeline-year-end", endYear)
-//	var data = table.filter(table.group(global.data, ["birthyear"]), function(list, year) {
 
-	var data = table.filter(table.group(global.data, ["birthyear"]), function(list, year) {
+	var data = global.data
+	
+	if(currentSelection.zipcode != null){
+		data = table.filter(table.group(data, ["zipcode"]), function(list, zipcode) {
+			return (zipcode == currentSelection.zipcode)
+		})
+	}
+	
+	if(currentSelection.jurisdiction != null){
+		data = table.filter(table.group(data, ["jurisdiction"]), function(list, jurisdiction) {
+			return (jurisdiction == currentSelection.jurisdiction)
+		})
+	}
+	
+	
+	var filteredData = table.filter(table.group(data, ["birthyear"]), function(list, year) {
 		year = parseFloat(year)
 		return (year >= startYear && year <= endYear)
 	})
 	
+	if(currentSelection.zipcode != null){
+		renderWorldMap(filteredData)
+		
+	} else if (currentSelection.jurisdiction != null){
+			renderNycMap(filteredData)
+	}else{
+		renderWorldMap(filteredData)
+		renderNycMap(filteredData)
+		
+	}
+
 	
 	d3.select("#svg-timeline .selected-year").classed("selected-year", false)
-	renderNycMap(data)
-	renderWorldMap(data)
-	renderTimeline(global.data)
+	renderTimeline(data)
 }
 
 //original function
@@ -322,8 +368,6 @@ function initTimeline(data) {
 	var width = 1100 - 100
 
 	var timeline = d3.select("#svg-timeline").append("svg");
-
-
 
 	// Render the Axes for the timeline
 
