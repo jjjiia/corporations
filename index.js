@@ -292,7 +292,7 @@ function updateMaps() {
 	d3.select("#svg-timeline .selected-year").classed("selected-year", false)
 	renderNycMap(data)
 	renderWorldMap(data)
-	renderTimeline(data)
+	renderTimeline(global.data)
 }
 
 //original function
