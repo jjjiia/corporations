@@ -154,6 +154,7 @@ function renderNycMap(data) {
 			var companiesByZipcode = table.group(data, ["zipcode"])
 			var zipcode = d.properties.postalCode
 			var newData = companiesByZipcode[zipcode]
+			resetAll()
 			renderWorldMap(newData)
 			renderTimeline(newData)
 		})
@@ -193,19 +194,24 @@ function renderWorldMap(data) {
 			var companiesByJurisdiction = table.group(global.data, ["jurisdiction"])
 			var jurisdiction = d.properties.name.toUpperCase()
 			var newData = companiesByJurisdiction[jurisdiction]
+
+			resetAll()
 			renderNycMap(newData)
 			renderTimeline(newData)
 		})
 
 	return map
 }
-//TODO: reset all button
+
+//reset all button
 d3.select("#resetAll")
 .on("click", function(){
+	resetAll()})
+
+function resetAll(){
 	updateSliderRange(1880, 2014);
 	updateMaps();
-})
-
+}
 
 // TODO: Rename these functions so they are in some sort of "timeline" namespace
 
@@ -266,12 +272,32 @@ function updateMaps() {
 		year = parseFloat(year)
 		return (year >= startYear && year <= endYear)
 	})
-	
+	d3.select("#svg-timeline .selected-year").classed("selected-year", false)
 	renderNycMap(data)
 	renderWorldMap(data)
 	renderTimeline(global.data)
 }
 
+//original function
+//function updateMaps() {
+//	var xScale = config.timeline.xScale
+//
+//	var startYear = Math.floor(xScale.invert(leftHandlePosition()))
+//	var endYear = Math.floor(xScale.invert(rightHandlePosition()))
+//
+//	var slider = d3.select("#svg-timeline .slider")
+//	slider.property("timeline-year-start", startYear)
+//	slider.property("timeline-year-end", endYear)
+//
+//	var data = table.filter(table.group(global.data, ["birthyear"]), function(list, year) {
+//		year = parseFloat(year)
+//		return (year >= startYear && year <= endYear)
+//	})
+//	
+//	renderNycMap(data)
+//	renderWorldMap(data)
+//	renderTimeline(global.data)
+//}
 
 function initTimeline(data) {
 	// TODO: Move this into CSS just like above.
@@ -402,7 +428,6 @@ function initTimeline(data) {
 
 
 	// Add all of the histogram vertical bars
-
 	timeline.selectAll("rect")
 		.data(utils.range(1880, 2014))
 		.enter()
@@ -459,9 +484,10 @@ function renderTimeline(data) {
 		.on("click", function(d) {
 			d3.select("#svg-timeline .selected-year").classed("selected-year", false)
 			d3.select(this).classed("selected-year", true)
-
-			renderTimeline(global.data)
-
+			
+			updateSliderRange(d,d+1);
+			updateMaps();
+			
 			var companiesByYear = table.group(global.data, ["birthyear"])
 			var newData = companiesByYear[d]
 			renderNycMap(newData)
@@ -490,12 +516,13 @@ function dataDidLoad(error, nycPaths, worldPaths, data) {
 		$("#timeline-controls .stop").show()
 
 		var direction = 1
+		var sliderRange = 20
 		var year = Math.floor(config.timeline.xScale.invert(leftHandlePosition()))
 		config.timeline.timer = setInterval(function() {
-			updateSliderRange(year, year + 10)
+			updateSliderRange(year, year + sliderRange)
 			updateMaps()
 
-			if(year + 10 == 2014 && direction == 1) {
+			if(year + sliderRange == 2014 && direction == 1) {
 				direction = -1
 			}
 				
@@ -505,7 +532,7 @@ function dataDidLoad(error, nycPaths, worldPaths, data) {
 
 			year = year + direction
 
-		}, 100)
+		}, 10)
 	})
 
 	$("#timeline-controls .stop").click(timelineControlStop)
