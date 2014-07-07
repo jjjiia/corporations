@@ -150,7 +150,7 @@ function renderNycMap(data) {
 		.attr("fill", colorScale)
 		.on("click", function(d) {
 			renderNycMap(global.data)
-
+			d3.select(this).attr("fill", "black")
 			var companiesByZipcode = table.group(data, ["zipcode"])
 			var zipcode = d.properties.postalCode
 			var newData = companiesByZipcode[zipcode]
@@ -188,7 +188,8 @@ function renderWorldMap(data) {
 		.attr("fill", colorScale)
 		.on("click", function(d) {
 			renderWorldMap(global.data)
-
+			d3.select(this).attr("fill", "black")
+			
 			var companiesByJurisdiction = table.group(global.data, ["jurisdiction"])
 			var jurisdiction = d.properties.name.toUpperCase()
 			var newData = companiesByJurisdiction[jurisdiction]
@@ -198,7 +199,12 @@ function renderWorldMap(data) {
 
 	return map
 }
-
+//TODO: reset all button
+d3.select("#resetAll")
+.on("click", function(){
+	updateSliderRange(1880, 2014);
+	updateMaps();
+})
 
 
 // TODO: Rename these functions so they are in some sort of "timeline" namespace
@@ -254,12 +260,13 @@ function updateMaps() {
 	var slider = d3.select("#svg-timeline .slider")
 	slider.property("timeline-year-start", startYear)
 	slider.property("timeline-year-end", endYear)
+//	var data = table.filter(table.group(global.data, ["birthyear"]), function(list, year) {
 
 	var data = table.filter(table.group(global.data, ["birthyear"]), function(list, year) {
 		year = parseFloat(year)
 		return (year >= startYear && year <= endYear)
 	})
-
+	
 	renderNycMap(data)
 	renderWorldMap(data)
 	renderTimeline(global.data)
