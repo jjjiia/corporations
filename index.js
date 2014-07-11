@@ -1,21 +1,32 @@
 //TODO: fix when zipcode or country has no companies
 
 var config = {
-	zoom: 0.95,
+	zoom: .95,
 	timeline: {
 		timer: null,
 		width: 1100,
 		barWidth: 5,
 		// TODO: Update this and remove this "magic" constant for the width '1100'
-		xScale: d3.scale.linear().domain([1880,2014]).range([20, 1100 - 100])
+		xScale: d3.scale.linear().domain([1880,2014]).range([20, 950])
 	}
 }
+
+
+
+
 
 var global = {
 	data: null,
 	nycPaths: null,
-	worldPaths: null
+	worldPaths: null,
+	worldMapWidth: 550,
+	worldMapHeight: 550,
+	usMapWidth:375,
+	usMapHeight:375
+	
 }
+console.log(window.innerWidth)
+
 //put currentSelection in to global
 var currentSelection = {
 	zipcode: null,
@@ -102,10 +113,10 @@ var table = {
 }
 
 
-function renderMap(data, selector) {
+function renderMap(data, selector,width,height) {
 	// TODO: Move to CSS
-	var width = 500
-	var height = 500
+//	var width = 450
+//	var height = 450
 
 	var projection = d3.geo.mercator().scale(1).translate([0, 0])
 	var path = d3.geo.path().projection(projection);
@@ -131,7 +142,7 @@ function renderMap(data, selector) {
 }
 
 function initNycMap(paths, data) {
-	var map = renderMap(paths, "#svg-nyc-map")
+	var map = renderMap(paths, "#svg-nyc-map", global.usMapWidth,global.usMapHeight)
 	renderNycMap(data)
 }
 
@@ -179,7 +190,7 @@ function renderNycMap(data) {
 }
 
 function initWorldMap(paths, data) {
-	var map = renderMap(paths, "#svg-world-map")
+	var map = renderMap(paths, "#svg-world-map", global.worldMapWidth, global.worldMapHeight)
 	renderWorldMap(data)
 }
 
@@ -364,21 +375,24 @@ function updateMaps() {
 
 function initTimeline(data) {
 	// TODO: Move this into CSS just like above.
+	
 	var height = 150
-	var width = 1100 - 100
-
+	var width = 950
+	var marginH = 20
+	var marginW = 4
+	
 	var timeline = d3.select("#svg-timeline").append("svg");
 
 	// Render the Axes for the timeline
 
 	var xScale = config.timeline.xScale
-	var yScale = d3.scale.log().domain([1,1050]).range([height-20,4]);
+	var yScale = d3.scale.log().domain([1, width+20]).range([height-marginH,marginW]);
 
 	var xAxis = d3.svg.axis().scale(xScale).tickSize(1).ticks(16).tickFormat(d3.format("d"))
 	var yAxis = d3.svg.axis().scale(yScale).tickSize(1).orient("right").tickFormat(d3.format("d")).tickValues([1, 10, 100,1000]);
 
 	timeline.append("g")
-		.attr("transform", "translate(0," + (height-20) + ")")
+		.attr("transform", "translate(0," + (height-marginH) + ")")
 		.call(xAxis);
 
 	timeline.append("g")
@@ -396,9 +410,9 @@ function initTimeline(data) {
 		.attr("x", 20)
 		.attr("y", 0)
 		.attr("width", width-20)
-		.attr("height", height-20)
+		.attr("height", height-marginH)
 		.attr("fill", "#E1883B")
-		.attr("opacity", 0.1)
+		.attr("opacity", 0.15)
 		.call(d3.behavior.drag()
 			.on("dragstart", function() {
 				d3.event.sourceEvent.stopPropagation();
@@ -429,7 +443,7 @@ function initTimeline(data) {
 		.attr("x", 20)
 		.attr("y", 0)
 		.attr("width", barwidth)
-		.attr("height", height-20)
+		.attr("height", height-marginH)
 		.attr("fill", "#E1883B")
 		.attr("opacity", 0.3)
 		.call(d3.behavior.drag()
@@ -461,7 +475,7 @@ function initTimeline(data) {
 		.attr("x", width)
 		.attr("y", 0)
 		.attr("width", barwidth)
-		.attr("height", height-20)
+		.attr("height", height-marginH)
 		.attr("fill", "#E1883B")
 		.attr("opacity", 0.3)
 		.call(d3.behavior.drag()
@@ -504,9 +518,9 @@ function initTimeline(data) {
 function renderTimeline(data) {
 	// TODO: Move this into CSS just like above.
 	var height = 150
-	var width = 1100 - 100
+	var width = 950
 
-	var yScaleFlipped = d3.scale.log().domain([1,1050]).range([4, height-20]);
+	var yScaleFlipped = d3.scale.log().domain([1,1000]).range([4, height-20]);
 
 	// Render the actual bars
 	var companiesByYear = table.group(data, ["birthyear"])
@@ -605,6 +619,24 @@ $(function() {
 	queue()
 		.defer(d3.json, 'data/processed/nyc-zip-codes.geojson')
 		.defer(d3.json, 'data/processed/world.geojson')
-		.defer(d3.csv, 'data/processed/newyorkcity.csv')
+		.defer(d3.csv, csv)
 		.await(dataDidLoad);
 })
+
+
+var win = window,
+    doc = document,
+    e = doc.documentElement,
+    g = doc.getElementsByTagName('body')[0],
+    x = win.innerWidth || e.clientWidth || g.clientWidth,
+    y = win.innerHeight|| e.clientHeight|| g.clientHeight;
+	
+function updateWindow(){
+    x = win.innerWidth || e.clientWidth || g.clientWidth;
+    y = win.innerHeight|| e.clientHeight|| g.clientHeight;
+	usMapWidth = x/2
+    d3.select("#svg-world-map svg").attr("width", x).attr("height", y);
+	updateMaps()
+}
+
+//window.onresize = updateWindow;

@@ -1,38 +1,84 @@
 html, body{
-  max-height: 1000px;
-  max-width: 1800px;
+
   font-family:"Baskerville"; font-weight: lighter;
-  letter-spacing:1px;
+letter-spacing:2px;
   overflow-y: auto;
   overflow-x: auto;
   font-size:12px;
-  font-color:#111;
+  font-color:#222;
 }
 a{
 	font-color:#000;
 }
+#header{
+	position:fixed;
+	top:0px;
+	left:0px;
+}
+#title-text{
+	position:fixed;
+	left:0px;
+	top:0px;
+	padding-top:20px;
+	padding-left:90px;
+}
+
+#logo{
+	padding:10px;
+	height: 60px;
+	width: 60px;
+	z-index: 3;
+  
+}
 #title{
-	position:absolute;
-	top:15px;
-	left:105px;
-	font-size: 48px;
-	color:#111;
-	letter-spacing:3px;
+	padding-left:5px;
+	font-size: 32px;
 }
 #subtitle{
-	position: absolute;
-	top:73px;
-	left:107px;
+	padding-left:5px;
 	font-size:14px;
-	letter-spacing:2px;
 }
-#logo{
-  position:absolute;
-  top: 30px;
-  left :30px;
-  height: 60px;
-  width: 60px;
-  z-index: 3;
+
+#containers {width:1000px;height:700px;position:relative;float:top;}
+
+#containers #svg-nyc-map {position:relative; float:left; margin-top:70px; padding:10px;border-right:1px solid #ddd;}
+
+#containers #svg-world-map{position:relative; float:left; overflow:hidden; margin-right:10px; margin-top:0px;}
+
+
+#containers #svg-timeline {
+	width:1000px;
+	height:150px;
+	position:absolute;
+	top:500px;
+	font-size:10px;
+}
+
+#containers #svg-timeline .selected-year {
+	fill:#ECAB23;
+}
+
+#axisLabels #axisYear{
+	position:absolute;
+	top:650px;
+	left:15px;
+	font-size:10px;
+	
+}
+#axisLabels #axisCompanies{
+	position:absolute;
+	top:490px;
+	left:920px;
+	font-size:10px;
+}
+#timeline-controls .stop {
+	display:none;
+}
+#selectionDetails{
+	position:absolute;
+	top:480px;
+	left:20px;
+	font-size:12px;
 }
 
 #currentSelection{
@@ -41,6 +87,7 @@ a{
 	top:600px;
 	width:260px;
 	font-size:14px;
+	border:1px black solid;
 }
 #countryName{
   position: absolute;
@@ -48,65 +95,6 @@ a{
   left:530px;;
 }
 
-#containers{
-  width: 1000px;
-  height: 700px;
-}
-
-#svgContainer1 {
-  position: absolute;
-  left:30px;;
-  top: 110px;
-  width: 450px;
-  height: 500px;
-  padding:10px;
-    
-}
-
-#svgContainer1 svg{
-  position: absolute;
-  left: 2px;
-}
-#timelineX{
-	top:715px;
-	left:350px;
-	position:absolute;
-	font-size:11px;
-}
-#timelineY{
-	top:580px;
-	left:1340px;
-	position:absolute;
-	font-size:11px;
-}
-#svgContainer2 {
-  position: absolute;
-  left:530px;
-  top: 110px;
-  right: 20px;
-  width: 800px;
-  height: 450px;
-  padding:10px;
-  border-left:solid 1px #ddd;
-}
-
-#svgContainer3 svg{
-cursor:pointer;
-}
-#svgContainer3 {
-	width:1100px;
-	height:150px;
-	position:absolute;
-	top:600px;
-	left:340px;
-	
-}
-#map-descp {
-  font-size: 12px;
-  color :#000;
-  letter-spacing: 1.5px;
-  z-index: 3;
-}
 
 #data-lightbox {
   position: absolute;
@@ -146,12 +134,22 @@ cursor:pointer;
   left: 95%;
 }
 
+#resetAll{position:absolute;top:130px;left:30px;color:#444;cursor:pointer;font-size:14px;}
+#resetAll:hover{color:#444;cursor:pointer;text-shadow: 1px 1px 12px #ff2222;}
+#resetAll:active{color:#ff2222;cursor:pointer;text-shadow: 1px 1px 12px #ff2222;}
+
+#timeline-controls{position:absolute;top:140px;left:30px;color:#444;cursor:pointer;font-size:14px;}
+#timeline-controls:hover{color:#444;cursor:pointer;text-shadow: 1px 1px 12px #E1883B;}
+#timeline-controls:active{color:#E1883B;cursor:pointer;text-shadow: 1px 1px 12px #E1883B;}
+
+
 
 #footer i.fa-plus {
   font-size: 10px;
   opacity: 0.5;
   margin: 5px;
 }
+#footer{position:absolute;bottom:10px;margin-left:10px;border-top:1px solid #aaa;line-height:200%;color:#aaa;width:95%;}
 
 #footer a{
   color: rgba(100,100,100,1.0);
@@ -182,44 +180,13 @@ cursor:pointer;
 #essayContent a {color: black;text-decoration: underline;z-index:90;}
 #companyList td, #companyList th{text-align:left;vertical-align:top;}
 #companyList p{ margin-bottom: 10px;margin-left:30px;margin-right:120px;z-index:9999;}
-#footer{position:relative; float:bottom; margin-left:2%;border-top:1px solid #aaa;width:96%; line-height:200%;margin-top:50px;height:30px;font-size:12px; letter-spacing:1px;color:#aaa;}
 #feedback{position:relative; float:right;width:200px;text-align:right;}
 #credit{position:relative; float:left;width:700px;text-align:left;}
 #essayBox-close{position:relative;float:right;}
 #essayBox-close2{position:relative;float:right;height:30px;}
 #detailMore{cursor: pointer;color:#000;position:relative;float:left;margin-left:30px;margin-top:-10px;height:40px;font-size:18px;}
 
-#resetAll{position:absolute;top:130px;left:1200px;color:#2DA1B3;cursor:pointer;}
-#resetAll:hover{color:#2DA1B3;cursor:pointer;text-shadow: 1px 1px 12px #2DA1B3;}
-#resetAll:active{color:#E1883B;cursor:pointer;text-shadow: 1px 1px 12px #E1883B;}
 
-#play{position:absolute;top:580px;left:360px;color:#E1883B;cursor:pointer;font-size:14px;}
-#play:hover{color:#E1883B;cursor:pointer;text-shadow: 1px 1px 12px #E1883B;}
-#play:active{color:#E1883B;cursor:pointer;text-shadow: 1px 1px 12px #E1883B;}
-
-.axis {
-  shape-rendering: crispEdges;
-}
-
-.x.axis line {
-  stroke: #fff;
-}
-
-.x.axis .minor {
-  stroke-opacity: .5;
-}
-
-.x.axis path {
-	stroke: #aaa;
-}
-
-.y.axis line, .y.axis path {
-  fill: none;
-  stroke: #aaa;
-}
-.axis text {
-    font-size: 10px;
-}
 .d3-tip {
   line-height: 1;
   padding: 4px;
