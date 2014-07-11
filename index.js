@@ -25,7 +25,6 @@ var global = {
 	usMapHeight:375
 	
 }
-console.log(window.innerWidth)
 
 //put currentSelection in to global
 var currentSelection = {
@@ -172,7 +171,6 @@ function renderNycMap(data) {
 			
 			currentSelection.zipcode = zipcode
 			currentSelection.jurisdiction = null
-			console.log("test ",currentSelection.zipcode)
 			
 			var newData = companiesByZipcode[zipcode]
 			updateSliderRange(1880, 2014);
@@ -222,7 +220,6 @@ function renderWorldMap(data) {
 			
 			currentSelection.jurisdiction = jurisdiction
 			currentSelection.zipcode = null
-			console.log("test ",currentSelection.jurisdiction)
 			
 			updateSliderRange(1880, 2014);
 			updateMaps();
@@ -347,11 +344,91 @@ function updateMaps() {
 		
 	}
 
+	d3.select("#selectionDetails").html(formatDisplayText(filteredData))
 	
 	d3.select("#svg-timeline .selected-year").classed("selected-year", false)
 	renderTimeline(data)
 }
 
+function formatDisplayText(data){
+	var numberOfCompanies = data.length
+	
+	var jurisdictionList = []
+	var zipcodeList = []
+	var yearList = []
+	
+	for(var entry in data){
+		dataEntry = data[entry]
+		var jurisdiction = dataEntry.jurisdiction
+		var zipcode = dataEntry.zipcode
+		var year = dataEntry.birthyear
+		
+		if(yearList.indexOf(year) < 0){
+			yearList.push(year)
+		}
+		if(jurisdictionList.indexOf(jurisdiction) < 0){
+			jurisdictionList.push(jurisdiction)
+		}
+		if(zipcodeList.indexOf(zipcode) < 0){
+			zipcodeList.push(zipcode)
+		}
+	}
+	
+	
+	var numberOfYears = yearList.length
+	var numberOfJurisdictions = jurisdictionList.length
+	var numberOfZipcodes = zipcodeList.length
+	var firstYear = yearList.sort()[0]
+	var lastYear = yearList.sort()[yearList.length-1]
+	console.log(firstYear, lastYear)
+
+	
+	if(numberOfYears == 1){
+		var yearString = "In <span style=\"color:#ff2222\">"+ yearList[0]+ "</span>"
+	}else{
+		var yearString = "Between <span style=\"color:#ff2222\">"+ firstYear + "</span> and <span style=\"color:#ff2222\">" + lastYear + "</span>, "
+	}
+	
+	if(numberOfJurisdictions == 1){
+		var jurisdictionString = " from <span style=\"color:#ff2222\">" + toTitleCase(jurisdictionList[0]) + "</span>"
+	}else{
+		var jurisdictionString = " from <span style=\"color:#ff2222\">" + numberOfJurisdictions + "</span> jurisdictions "
+	}
+	
+	if(numberOfZipcodes == 1){
+		var zipcodeString = " in <span style=\"color:#ff2222\">" + zipcodeList[0]+"</span>"
+	}else{
+		var zipcodeString = " in  <span style=\"color:#ff2222\">" + numberOfZipcodes + "</span> zipcodes"
+		
+	}
+	
+	
+	if(numberOfCompanies == 1){
+		var companyString = " there was <span style=\"color:#ff2222\">" + numberOfCompanies + "</span> company registrations"
+	}else if (numberOfCompanies == 0){
+		var companyString = " there were no companies"
+	}else{
+		var companyString = " there were <span style=\"color:#ff2222\">" + numberOfCompanies + "</span> company registrations"
+	}
+	
+	var outputString = yearString+companyString+zipcodeString+jurisdictionString
+	
+	if(data.length == 0){
+		var outputString = "There are no companies in current selection."
+	}
+	
+	return  outputString
+	
+}
+
+function formatCompanyList(data){
+	
+}
+
+function toTitleCase(str)
+{
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}
 //original function
 //function updateMaps() {
 //	var xScale = config.timeline.xScale
@@ -536,7 +613,6 @@ function renderTimeline(data) {
 				return height - 20 - yScaleFlipped(a.length)
 			}
 		})
-		// TODO: Fix the widths...
 		.attr("width", 5)
 		.attr("fill", function(d) {
 			var startYear = d3.select("#svg-timeline .slider").property("timeline-year-start")
