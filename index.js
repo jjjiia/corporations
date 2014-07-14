@@ -113,9 +113,6 @@ var table = {
 
 
 function renderMap(data, selector,width,height) {
-	// TODO: Move to CSS
-//	var width = 450
-//	var height = 450
 
 	var projection = d3.geo.mercator().scale(1).translate([0, 0])
 	var path = d3.geo.path().projection(projection);
@@ -380,7 +377,7 @@ function formatDisplayText(data){
 	var numberOfZipcodes = zipcodeList.length
 	var firstYear = yearList.sort()[0]
 	var lastYear = yearList.sort()[yearList.length-1]
-	console.log(firstYear, lastYear)
+	//console.log(firstYear, lastYear)
 
 	
 	if(numberOfYears == 1){
@@ -415,6 +412,7 @@ function formatDisplayText(data){
 	
 	if(data.length == 0){
 		var outputString = "There are no companies in current selection."
+		d3.select("#selectionDetails #companyList").html("see companies")
 	}
 	
 	return  outputString
@@ -453,7 +451,7 @@ function toTitleCase(str)
 function initTimeline(data) {
 	// TODO: Move this into CSS just like above.
 	
-	var height = 150
+	var height = 100
 	var width = 950
 	var marginH = 20
 	var marginW = 4
@@ -594,7 +592,7 @@ function initTimeline(data) {
 
 function renderTimeline(data) {
 	// TODO: Move this into CSS just like above.
-	var height = 150
+	var height = 100
 	var width = 950
 
 	var yScaleFlipped = d3.scale.log().domain([1,1000]).range([4, height-20]);
@@ -683,7 +681,7 @@ function dataDidLoad(error, nycPaths, worldPaths, data) {
 
 			year = year + direction
 
-		}, 10)
+		}, 100)
 	})
 
 	$("#timeline-controls .stop").click(timelineControlStop)
@@ -700,19 +698,74 @@ $(function() {
 })
 
 
-var win = window,
-    doc = document,
-    e = doc.documentElement,
-    g = doc.getElementsByTagName('body')[0],
-    x = win.innerWidth || e.clientWidth || g.clientWidth,
-    y = win.innerHeight|| e.clientHeight|| g.clientHeight;
-	
-function updateWindow(){
-    x = win.innerWidth || e.clientWidth || g.clientWidth;
-    y = win.innerHeight|| e.clientHeight|| g.clientHeight;
-	usMapWidth = x/2
-    d3.select("#svg-world-map svg").attr("width", x).attr("height", y);
-	updateMaps()
-}
-
+//var win = window,
+//    doc = document,
+//    e = doc.documentElement,
+//    g = doc.getElementsByTagName('body')[0],
+//    x = win.innerWidth || e.clientWidth || g.clientWidth,
+//    y = win.innerHeight|| e.clientHeight|| g.clientHeight;
+//	
+//function updateWindow(){
+//    x = win.innerWidth || e.clientWidth || g.clientWidth;
+//    y = win.innerHeight|| e.clientHeight|| g.clientHeight;
+//	usMapWidth = x/2
+//    d3.select("#svg-world-map svg").attr("width", x).attr("height", y);
+//	updateMaps()
+//}
 //window.onresize = updateWindow;
+
+//ESSAY BOX DO NOT CHANGE
+var essayBoxShown = false;
+ $('#showMore').click(function(e){
+     e.preventDefault();
+     essayBoxShown = !essayBoxShown;
+     if (essayBoxShown) {
+         $('#essayBox').css('display', 'block');
+         $('#essayBox').animate({'opacity':1.0}, 500);
+         $(this).text(' ... view map ');
+     } else {
+         closeEssayBox();
+         $(this).text(' ... more ');
+     }
+   })
+   $('#essayBox-close').click(function(){
+//	   console.log("close")
+     closeEssayBox();
+     $('#showMore').text(' ... more ');
+   });
+
+
+  function closeEssayBox(){
+   $('#essayBox').animate({'opacity':0.0}, 500, function () {
+     $('#essayBox').css('display', 'none');
+   })
+   essayBoxShown = false;
+ }
+
+ //ESSAY box 2
+ var essayBoxShown2 = false;
+  $('#detailMore').click(function(e){
+      e.preventDefault();
+      essayBoxShown2 = !essayBoxShown2;
+      if (essayBoxShown2) {
+          $('#essayBox2').css('display', 'block');
+          $('#essayBox2').animate({'opacity':1.0}, 500);
+          $(this).text(' Hide Companies ');
+      } else {
+          closeEssayBox2();
+          $(this).text(' Show Companies ');
+      }
+    })
+    $('#essayBox-close2').click(function(){
+ //	   console.log("close")
+      closeEssayBox2();
+      $('#detailMore').text(' See Companies ');
+    });
+
+
+   function closeEssayBox2(){
+    $('#essayBox2').animate({'opacity':0.0}, 500, function () {
+      $('#essayBox2').css('display', 'none');
+    })
+    essayBoxShown2 = false;
+  }	

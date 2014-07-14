@@ -1,7 +1,7 @@
 html, body{
 
-  font-family:"Baskerville"; font-weight: lighter;
-letter-spacing:2px;
+    font-family:"Baskerville"; font-weight: lighter;
+	letter-spacing:1px;
   overflow-y: auto;
   overflow-x: auto;
   font-size:12px;
@@ -19,20 +19,22 @@ a{
 	position:fixed;
 	left:0px;
 	top:0px;
-	padding-top:10px;
+	padding-top:5px;
 	padding-left:90px;
 }
 
 #logo{
-	padding:10px;
 	height: 60px;
 	width: 60px;
 	z-index: 3;
+	margin:10px;
   
 }
 #title{
 	padding-left:5px;
 	font-size: 46px;
+	line-height:100%;
+	margin-top:10px;
 }
 #subtitle{
 	padding-left:5px;
@@ -41,16 +43,17 @@ a{
 
 #containers {width:1000px;height:700px;position:relative;float:top;}
 
-#containers #svg-nyc-map {position:relative; float:left; margin-top:70px; padding:10px;}
+#containers #svg-nyc-map {position:relative; float:left; margin-top:72px; padding:20px;}
 
-#containers #svg-world-map{position:relative; float:left; overflow:hidden; margin-right:10px; margin-top:0px;}
+#containers #svg-world-map{position:relative; float:left; overflow:hidden; margin-top:-10px;}
 
 
 #containers #svg-timeline {
 	width:1000px;
 	height:150px;
 	position:absolute;
-	top:500px;
+	top:520px;
+	left:20px;
 	font-size:10px;
 }
 
@@ -60,35 +63,30 @@ a{
 
 #axisLabels #axisYear{
 	position:absolute;
-	top:650px;
-	left:15px;
-	font-size:10px;
+	top:615px;
+	left:30px;
+	font-size:11px;
 	
 }
 #axisLabels #axisCompanies{
 	position:absolute;
-	top:490px;
+	top:495px;
 	left:920px;
-	font-size:10px;
+	font-size:11px;
 }
 #timeline-controls .stop {
 	display:none;
 }
 #selectionDetails{
 	position:absolute;
-	top:465px;
+	top:470px;
 	left:20px;
 	font-size:16px;
 }
-
-#currentSelection{
-	position:absolute;
-	left:30px;
-	top:600px;
-	width:260px;
-	font-size:14px;
-	border:1px black solid;
+#selectionDetails #currentSelection, #selectionDetails #companyList{
+	display:inline-block;
 }
+
 #countryName{
   position: absolute;
   top:120px;
@@ -134,14 +132,13 @@ a{
   left: 95%;
 }
 
-#resetAll{position:absolute;top:130px;left:30px;color:#666;cursor:pointer;font-size:14px;}
+#resetAll{position:absolute;top:120px;left:30px;color:#666;cursor:pointer;font-size:14px;}
 #resetAll:hover{color:#666;cursor:pointer;text-shadow: 1px 1px 12px  #aaa;}
 #resetAll:active{color:#ff2222;cursor:pointer;text-shadow: 1px 1px 12px  #aaa;}
 
 #timeline-controls{position:absolute;top:140px;left:30px;color:#666;cursor:pointer;font-size:14px;}
 #timeline-controls:hover{color:#666;cursor:pointer;text-shadow: 1px 1px 12px #aaa;}
 #timeline-controls:active{color:#ff2222;cursor:pointer;text-shadow: 1px 1px 12px #aaa;}
-
 
 
 #footer i.fa-plus {
