@@ -30,11 +30,14 @@
       </script>
 </head>
 
-<style type="text/css" media="screen">
-
-</style>
-
 <body>
+	
+	<div id="containers">
+		<div id="svg-nyc-map"></div>
+		<div id="svg-world-map"></div>
+		<div id="svg-timeline"></div>
+	</div>
+	
 	<div id = "header">
 		<div id = "logo">
 			<a href="http://youarehere.media.mit.edu"><img id="logo" src="static/images/logo.jpg"></a>
@@ -45,11 +48,7 @@
 		</div>
 	</div>
 	
-	<div id="containers">
-		<div id="svg-nyc-map"></div>
-		<div id="svg-world-map"></div>
-		<div id="svg-timeline"></div>
-	</div>
+	
 	<div id = "axisLabels">
 		<div id = "axisYear">Year</div>
 		<div id = "axisCompanies"># Companies</div>
@@ -60,10 +59,11 @@
 	</div>
 	
 	<div id = "selectionDetails">
-		<div id = "companyList"></div>
 		<div id = "currentSelection"></div>
+		<div id = "seeCompanyList"></div>
 	</div>
 	
+	<div id = "specialCountries"></div>
 	
 	<div id = "footer">
 		<div id ="credit">This work is part of the <a href="http://youarehere.cc">You Are Here</a> project +

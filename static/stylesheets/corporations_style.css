@@ -4,7 +4,7 @@ html, body{
 	letter-spacing:1px;
   overflow-y: auto;
   overflow-x: auto;
-  font-size:12px;
+  font-size:14px;
   font-color:#222;
 }
 a{
@@ -72,7 +72,7 @@ a{
 	position:absolute;
 	top:495px;
 	left:920px;
-	font-size:11px;
+	font-size:10px;
 }
 #timeline-controls .stop {
 	display:none;
@@ -81,18 +81,24 @@ a{
 	position:absolute;
 	top:470px;
 	left:20px;
-	font-size:16px;
+	font-size:14px;
 }
-#selectionDetails #currentSelection, #selectionDetails #companyList{
+#selectionDetails #currentSelection, #selectionDetails #seeCompanyList{
 	display:inline-block;
 }
 
-#countryName{
-  position: absolute;
-  top:120px;
-  left:530px;;
+#specialCountries{
+	position:absolute;
+	top:350px;
+	left:430px;
+	font-size:11px;
+	color:#aaa;
 }
-
+#hongkong, #cayman, #antilles, #virgin{cursor:pointer;}
+#hongkong:hover{color:red;}
+ #cayman:hover{color:red;}
+ #antilles:hover {color:red;}
+ #virgin:hover{color:red;}
 
 #data-lightbox {
   position: absolute;
@@ -140,7 +146,13 @@ a{
 #timeline-controls:hover{color:#666;cursor:pointer;text-shadow: 1px 1px 12px #aaa;}
 #timeline-controls:active{color:#ff2222;cursor:pointer;text-shadow: 1px 1px 12px #aaa;}
 
+#showMore:hover{color:#666;cursor:pointer;text-shadow: 1px 1px 12px #aaa;text-decoration:none;}
+#showMore:active{color:#ff2222;cursor:pointer;text-shadow: 1px 1px 12px #aaa;text-decoration:none;}
 
+#seeCompanyList:hover{color:#666;cursor:pointer;text-shadow: 1px 1px 12px #aaa;text-decoration:none;}
+#seeCompanyList:active{color:#ff2222;cursor:pointer;text-shadow: 1px 1px 12px #aaa;text-decoration:none;}
+	
+	
 #footer i.fa-plus {
   font-size: 10px;
   opacity: 0.5;
@@ -169,19 +181,22 @@ a{
 }
 /*light boxes*/
 #essayBox{ position:absolute; top:100px;display: none;height: 600px; border-radius: 5px;opacity: 0.0;color : #444;padding-left: 60px; padding-right: 120px; font-size: 16px;letter-spacing: 1px;background-color:rgba(255, 255, 255, 0.9);font-family: 'EB Garamond', serif;z-index:200;}
-#essayBox2{  position:absolute; top:100px;display: none; height: 580px; width:100%; border-radius: 5px;  opacity: 0.0;color : #444; padding-left: 80px; padding-right: 120px;font-size: 12px;letter-spacing: 1px; background-color:rgba(255, 255, 255, 0.9);font-family: 'EB Garamond', serif; z-index:200; overflow:auto;}
+#essayBox2{  position:absolute; top:95px;display: none; height: 360px; width:1000px; border-radius: 5px;  opacity: 0.0;color : #444; padding-left: 80px; padding-right: 120px;font-size: 12px;letter-spacing: 1px; background-color:rgba(255, 255, 255, 0.9);font-family: 'EB Garamond', serif; z-index:200; overflow:auto;}
 #essayBox-close { cursor: pointer; height: 15%;width: 5%; padding: 5px; color:rgb(1,1,1); z-index:100;}
 #essayBox-close2 {cursor: pointer; height: 15%;width: 5%;padding: 5px; color:rgb(1,1,1); z-index:100;}
 #essayContent p {margin-bottom: 10px;margin-left:100px;margin-right:150px;z-index:90;}
 #essayContent table{margin-left:100px;margin-right:150px;font-size:11px;}
 #essayContent a {color: black;text-decoration: underline;z-index:90;}
+
+#companyList{font-size:14px;}
+#companyList table{table-layout:fixed;}
 #companyList td, #companyList th{text-align:left;vertical-align:top;}
 #companyList p{ margin-bottom: 10px;margin-left:30px;margin-right:120px;z-index:9999;}
+
 #feedback{position:relative; float:right;width:200px;text-align:right;}
 #credit{position:relative; float:left;width:700px;text-align:left;}
 #essayBox-close{position:relative;float:right;}
 #essayBox-close2{position:relative;float:right;height:30px;}
-#detailMore{cursor: pointer;color:#000;position:relative;float:left;margin-left:30px;margin-top:-10px;height:40px;font-size:18px;}
 
 
 .d3-tip {

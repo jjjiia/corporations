@@ -301,6 +301,7 @@ function updateHandleLocations() {
 }
 
 function updateMaps() {
+	
 	var xScale = config.timeline.xScale
 
 	var startYear = Math.floor(xScale.invert(leftHandlePosition()))
@@ -340,11 +341,53 @@ function updateMaps() {
 		renderNycMap(filteredData)
 		
 	}
-
-	d3.select("#selectionDetails").html(formatDisplayText(filteredData))
+	
+	formatCompanyList(filteredData)
+	
+	d3.select("#currentSelection").html(formatDisplayText(filteredData))
+	
+	d3.select("#companyList").html(formatCompanyList(filteredData))
+	
+	d3.select("#seeCompanyList").html("... See Companies")
 	
 	d3.select("#svg-timeline .selected-year").classed("selected-year", false)
 	renderTimeline(data)
+	
+	
+	d3.select("#specialCountries").html(formatSpecialCountries(filteredData))
+	
+	d3.select("#hongkong").on("click", function(){
+		specialCountriesClickHandler("HONG KONG")
+	})
+	d3.select("#cayman").on("click", function(){
+		specialCountriesClickHandler("CAYMAN ISLANDS")
+	})
+	d3.select("#antilles").on("click", function(){
+		specialCountriesClickHandler("NETHERLANDS ANTILLES")
+	})
+	d3.select("#virgin").on("click", function(){
+		specialCountriesClickHandler("BRITISH VIRGIN ISLANDS")
+	})
+}
+
+function specialCountriesClickHandler(jurisdiction){
+	var companiesByJurisdiction = table.group(global.data, ["jurisdiction"])
+	var newData = companiesByJurisdiction[jurisdiction]
+	
+	currentSelection.jurisdiction = jurisdiction
+	currentSelection.zipcode = null
+	
+	updateSliderRange(1880, 2014);
+	updateMaps();
+
+	var newDataStartEndYears = dateRangeForSelection(newData)
+	updateSliderRange(newDataStartEndYears[0],newDataStartEndYears[1])
+
+	renderWorldMap(global.data)
+	d3.select(this).attr("fill", "black")
+	renderNycMap(newData)
+	renderTimeline(newData)
+	d3.select("specialCountries").html("")
 }
 
 function formatDisplayText(data){
@@ -412,15 +455,59 @@ function formatDisplayText(data){
 	
 	if(data.length == 0){
 		var outputString = "There are no companies in current selection."
-		d3.select("#selectionDetails #companyList").html("see companies")
+		d3.select("#selectionDetails #companyList").html("... See companies")
 	}
 	
 	return  outputString
 	
 }
 
+function formatSpecialCountries(data){
+		var jurisdiction = table.group(data, ["jurisdiction"])
+		if(jurisdiction["CAYMAN ISLANDS"]){
+			var cayman ="<div id=\"cayman\">"+ "Cayman Islands "+jurisdiction["CAYMAN ISLANDS"].length+"</div>"
+		}else{
+			var cayman = ""
+		}
+		if(jurisdiction["BRITISH VIRGIN ISLANDS"]){
+			var virgin ="<div id=\"virgin\">"+ "British Virgin Islands "+jurisdiction["BRITISH VIRGIN ISLANDS"].length+"</div>"
+		}else{
+			var virgin = ""
+		}
+		if(jurisdiction["NETHERLANDS ANTILLES"]){
+			var antilles ="<div id=\"antilles\">"+ "Netherlands Antilles "+jurisdiction["NETHERLANDS ANTILLES"].length+"</div>"
+		}else{
+			var antilles = ""
+		}
+		if(jurisdiction["HONG KONG"]){
+			var hongkong ="<div id=\"hongkong\">"+ "Hong Kong "+jurisdiction["HONG KONG"].length+"</div>"
+		}else{
+			var hongkong = ""
+		}
+		
+		var outputString = cayman+virgin+antilles+hongkong
+		return outputString
+}
+
 function formatCompanyList(data){
 	
+	console.log(data)
+	var outputTable = "<table><col width = \"450px\" /><col width = \"100px\" /><col width = \"60px\" /><col width = \"100px\" />"
+	var firstRow = "<tr><td><span style=\"color:#ff2222\">Company Name</span></td><td><span style=\"color:#ff2222\">Year</span></td><td><span style=\"color:#ff2222\">Zipcode</span></td><td><span style=\"color:#ff2222\">Jurisdiction</td></span></tr>"
+	outputTable = outputTable+firstRow
+	for(var i in data){
+		var currentEntry = data[i]
+		var year = currentEntry.birthyear
+		var company = toTitleCase(currentEntry.name)
+		var zipcode = currentEntry.zipcode
+		var jurisdiction = toTitleCase(currentEntry.jurisdiction)
+		
+		var tableRow = "<tr><td>"+company+"</td><td>"+year+"</td><td>"+zipcode+"</td><td>"+jurisdiction+"</td></tr>"
+		outputTable = outputTable+tableRow
+	}
+	outputTable = outputTable+"</table>"
+	
+	return outputTable
 }
 
 function toTitleCase(str)
@@ -449,7 +536,6 @@ function toTitleCase(str)
 //}
 
 function initTimeline(data) {
-	// TODO: Move this into CSS just like above.
 	
 	var height = 100
 	var width = 950
@@ -744,22 +830,22 @@ var essayBoxShown = false;
 
  //ESSAY box 2
  var essayBoxShown2 = false;
-  $('#detailMore').click(function(e){
+  $('#seeCompanyList').click(function(e){
       e.preventDefault();
       essayBoxShown2 = !essayBoxShown2;
       if (essayBoxShown2) {
           $('#essayBox2').css('display', 'block');
           $('#essayBox2').animate({'opacity':1.0}, 500);
-          $(this).text(' Hide Companies ');
+          $(this).text('... Hide Companies ');
       } else {
           closeEssayBox2();
-          $(this).text(' Show Companies ');
+          $(this).text('... See Companies ');
       }
     })
     $('#essayBox-close2').click(function(){
  //	   console.log("close")
       closeEssayBox2();
-      $('#detailMore').text(' See Companies ');
+      $('#seeCompanyList').text('... See Companies ');
     });
 
 
