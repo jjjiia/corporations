@@ -362,7 +362,14 @@ function updateHandleLocations() {
 }
 
 function updateMaps() {
-	
+	d3.selectAll(".d3-tip-nyc").remove()
+	d3.selectAll(".d3-tip-world").remove()
+	d3.selectAll(".d3-tip").remove()
+
+	d3.selectAll(".slider").attr("opacity", .1)
+	d3.selectAll(".handle-left").attr("opacity", .3)
+	d3.selectAll(".handle-right").attr("opacity", .3)
+
 	var xScale = config.timeline.xScale
 
 	var startYear = Math.floor(xScale.invert(leftHandlePosition()))
@@ -739,7 +746,6 @@ function initTimeline(data) {
 }
 
 function renderTimeline(data) {
-	// TODO: Move this into CSS just like above.
 	var height = 100
 	var width = 950
 
@@ -749,7 +755,6 @@ function renderTimeline(data) {
 	var companiesByYear = table.group(data, ["birthyear"])
 
 	var timeline = d3.select("#svg-timeline").selectAll(".timeline-item")
-	console.log(data.length)
 	
 	timeline
 	    .attr("y", function(d) {
@@ -783,13 +788,20 @@ function renderTimeline(data) {
 			d3.select("#svg-timeline .selected-year").classed("selected-year", false)
 			d3.select(this).classed("selected-year", true)
 			
-			updateSliderRange(d,d+1);
+			if(d+10 > 2013){
+				var yearsafter = 2014-d
+				var yearsbefore = 20-yearsafter
+				updateSliderRange(d-yearsbefore,d+yearsafter);
+			}else{
+				updateSliderRange(d-9,d+10);				
+			}
+			updateSliderLocation();
 			updateMaps();
 			
-			var companiesByYear = table.group(global.data, ["birthyear"])
-			var newData = companiesByYear[d]
-			renderNycMap(newData)
-			renderWorldMap(newData)
+//			var companiesByYear = table.group(global.data, ["birthyear"])
+//			var newData = companiesByYear[d]
+//			renderNycMap(newData)
+//			renderWorldMap(newData)
 			tip.hide()
 			
 		})
@@ -840,7 +852,11 @@ function dataDidLoad(error, nycPaths, worldPaths, data) {
 	var nycMap = initNycMap(nycPaths, data)
 	var worldMap = initWorldMap(worldPaths, data)
 	var timeline = initTimeline(data)
-
+	d3.selectAll(".slider").attr("opacity", 0)
+	d3.selectAll(".handle-left").attr("opacity", 0)
+	d3.selectAll(".handle-right").attr("opacity", 0)
+	d3.select("#svg-timeline").selectAll(".timeline-item").attr("fill", "#aaa")
+	
 	$("#timeline-controls .play").click(function() {
 		$("#timeline-controls .play").hide()
 		$("#timeline-controls .stop").show()
@@ -861,7 +877,6 @@ function dataDidLoad(error, nycPaths, worldPaths, data) {
 			}
 
 			year = year + direction
-
 		}, 100)
 	})
 
