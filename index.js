@@ -166,19 +166,21 @@ function renderNycMap(data) {
 			var companiesByZipcode = table.group(data, ["zipcode"])
 			var zipcode = d.properties.postalCode
 			
-			currentSelection.zipcode = zipcode
-			currentSelection.jurisdiction = null
+			if(companiesByZipcode[zipcode]){
+				currentSelection.zipcode = zipcode
+				currentSelection.jurisdiction = null
 			
-			var newData = companiesByZipcode[zipcode]
-			updateSliderRange(1880, 2014);
-			updateMaps();
+				var newData = companiesByZipcode[zipcode]
+				updateSliderRange(1880, 2014);
+				updateMaps();
 			
-			renderNycMap(global.data)
-			d3.select(this).attr("fill", "black")
-			var newDataStartEndYears = dateRangeForSelection(newData)
-			updateSliderRange(newDataStartEndYears[0],newDataStartEndYears[1])
-			renderWorldMap(newData)
-			renderTimeline(newData)
+				renderNycMap(global.data)
+				d3.select(this).attr("fill", "black")
+				var newDataStartEndYears = dateRangeForSelection(newData)
+				updateSliderRange(newDataStartEndYears[0],newDataStartEndYears[1])
+				renderWorldMap(newData)
+				renderTimeline(newData)
+			}
 			tip.hide()
 			
 		})
@@ -189,17 +191,18 @@ function renderNycMap(data) {
 		map.call(tip);
 		map.on('mouseover', function(d){
 			var currentZipcode = d.properties.postalCode
-			if(table.group(global.data, ["zipcode"])[currentZipcode]){
+			if(table.group(data, ["zipcode"])[currentZipcode]){
 				var totalCompanies = table.group(global.data, ["zipcode"])[currentZipcode].length
 				if(data.length == global.data.length){
 					var tipText = currentZipcode + ": "+ totalCompanies + " Companies"
-					
 				}else{
 					var currentCompanies = table.group(data, ["zipcode"])[currentZipcode].length
 					var tipText = currentZipcode + ": "+ currentCompanies+" out of " + totalCompanies + " Companies"
 				}
-				
 				tip.html(function(d){return tipText})
+				tip.show()
+			}else{
+				tip.html(function(d){return currentZipcode + ": no companies"})
 				tip.show()
 			}
 		})
@@ -244,21 +247,24 @@ function renderWorldMap(data) {
 			
 			var companiesByJurisdiction = table.group(global.data, ["jurisdiction"])
 			var jurisdiction = d.properties.name.toUpperCase()
-			var newData = companiesByJurisdiction[jurisdiction]
 			
-			currentSelection.jurisdiction = jurisdiction
-			currentSelection.zipcode = null
+			if(companiesByJurisdiction[jurisdiction]){
 			
-			updateSliderRange(1880, 2014);
-			updateMaps();
+				var newData = companiesByJurisdiction[jurisdiction]
+			
+				currentSelection.jurisdiction = jurisdiction
+				currentSelection.zipcode = null
+			
+				updateSliderRange(1880, 2014);
+				updateMaps();
 
-			var newDataStartEndYears = dateRangeForSelection(newData)
-			updateSliderRange(newDataStartEndYears[0],newDataStartEndYears[1])
-
-			renderWorldMap(global.data)
-			d3.select(this).attr("fill", "black")
-			renderNycMap(newData)
-			renderTimeline(newData)
+				var newDataStartEndYears = dateRangeForSelection(newData)
+				updateSliderRange(newDataStartEndYears[0],newDataStartEndYears[1])
+				renderWorldMap(global.data)
+				d3.select(this).attr("fill", "black")
+				renderNycMap(newData)
+				renderTimeline(newData)
+			}
 			tip.hide()
 			
 		})
@@ -269,7 +275,7 @@ function renderWorldMap(data) {
 		map.call(tip);
 		map.on('mouseover', function(d){
 			var currentJurisdiction = d.properties.name.toUpperCase()
-			if(table.group(global.data, ["jurisdiction"])[currentJurisdiction]){
+			if(table.group(data, ["jurisdiction"])[currentJurisdiction]){
 				var totalCompanies = table.group(global.data, ["jurisdiction"])[currentJurisdiction].length
 				
 				if(data.length == global.data.length){
@@ -281,6 +287,9 @@ function renderWorldMap(data) {
 				}
 				
 				tip.html(function(d){return tipText})
+				tip.show()
+			}else{
+				tip.html(function(d){return toTitleCase(currentJurisdiction)+": no Companies"})
 				tip.show()
 			}
 		})
@@ -424,18 +433,18 @@ function updateMaps() {
 	
 	d3.select("#specialCountries").html(formatSpecialCountries(filteredData))
 	
-	d3.select("#hongkong").on("click", function(){
-		specialCountriesClickHandler("HONG KONG")
-	})
-	d3.select("#cayman").on("click", function(){
-		specialCountriesClickHandler("CAYMAN ISLANDS")
-	})
-	d3.select("#antilles").on("click", function(){
-		specialCountriesClickHandler("NETHERLANDS ANTILLES")
-	})
-	d3.select("#virgin").on("click", function(){
-		specialCountriesClickHandler("BRITISH VIRGIN ISLANDS")
-	})
+//	d3.select("#hongkong").on("click", function(){
+//		specialCountriesClickHandler("HONG KONG")
+//	})
+//	d3.select("#cayman").on("click", function(){
+//		specialCountriesClickHandler("CAYMAN ISLANDS")
+//	})
+//	d3.select("#antilles").on("click", function(){
+//		specialCountriesClickHandler("NETHERLANDS ANTILLES")
+//	})
+//	d3.select("#virgin").on("click", function(){
+//		specialCountriesClickHandler("BRITISH VIRGIN ISLANDS")
+//	})
 }
 
 function specialCountriesClickHandler(jurisdiction){
@@ -531,29 +540,27 @@ function formatDisplayText(data){
 }
 
 function formatSpecialCountries(data){
+		if(table.group(data, ["jurisdiction"])){
+
 		var jurisdiction = table.group(data, ["jurisdiction"])
-		if(jurisdiction["CAYMAN ISLANDS"]){
-			var cayman ="<div id=\"cayman\">"+ "Cayman Islands "+jurisdiction["CAYMAN ISLANDS"].length+"</div>"
-		}else{
-			var cayman = ""
+		var jurisdictionList = []
+		for(var item in jurisdiction){
+			jurisdictionList.push([item, parseInt(jurisdiction[item].length)])
 		}
-		if(jurisdiction["BRITISH VIRGIN ISLANDS"]){
-			var virgin ="<div id=\"virgin\">"+ "British Virgin Islands "+jurisdiction["BRITISH VIRGIN ISLANDS"].length+"</div>"
+		var sortedJurisdictionList = jurisdictionList.sort(function(a, b) {return a[1] - b[1]}).reverse()
+		if(sortedJurisdictionList.length >1){
+			var outputString = "Top Countries: <br/>"
+			var maxListLength = 5
+			if(sortedJurisdictionList.length<maxListLength){
+				maxListLength=sortedJurisdictionList.length
+			}
+			for(var i = 0; i < maxListLength; i++){
+				outputString = outputString + toTitleCase(sortedJurisdictionList[i][0])+" "+sortedJurisdictionList[i][1]+"</br>"
+			}	
 		}else{
-			var virgin = ""
+			var outputString =""
 		}
-		if(jurisdiction["NETHERLANDS ANTILLES"]){
-			var antilles ="<div id=\"antilles\">"+ "Netherlands Antilles "+jurisdiction["NETHERLANDS ANTILLES"].length+"</div>"
-		}else{
-			var antilles = ""
-		}
-		if(jurisdiction["HONG KONG"]){
-			var hongkong ="<div id=\"hongkong\">"+ "Hong Kong "+jurisdiction["HONG KONG"].length+"</div>"
-		}else{
-			var hongkong = ""
-		}
-		
-		var outputString = cayman+virgin+antilles+hongkong
+	}
 		return outputString
 }
 
@@ -832,9 +839,6 @@ function renderTimeline(data) {
 		.on('mouseout', function(d){
 			tip.hide()
 		})
-	
-
-
 }
 
 function timelineControlStop() {
@@ -861,22 +865,28 @@ function dataDidLoad(error, nycPaths, worldPaths, data) {
 		$("#timeline-controls .play").hide()
 		$("#timeline-controls .stop").show()
 
-		var direction = 1
+//		var direction = 1
 		var sliderRange = 20
 		var year = Math.floor(config.timeline.xScale.invert(leftHandlePosition()))
 		config.timeline.timer = setInterval(function() {
 			updateSliderRange(year, year + sliderRange)
 			updateMaps()
-
-			if(year + sliderRange == 2014 && direction == 1) {
-				direction = -1
-			}
+			
+			if(year+sliderRange >= 2014){
+				year = 1880
+				updateSliderRange(year, year + sliderRange)
+				updateMaps()
 				
-			if(year == 1880 && direction == -1) {
-				direction = 1
+				timelineControlStop()
 			}
-
-			year = year + direction
+//			if(year + sliderRange == 2014 && direction == 1) {
+//				direction = -1
+//			}
+//				
+//			if(year == 1880 && direction == -1) {
+//				direction = 1
+//			}
+			year = year + 1
 		}, 100)
 	})
 
