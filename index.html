@@ -75,13 +75,21 @@
 		</div>
 		<div class="spacer"></div>
 	</div>
+	
+    <form id="search">
+        <input type = "text" name ="searchTerm" value = "zip or country">
+		<input type = "submit" value = "Search">
+    </form>
+	
 	<script type="text/javascript" charset="utf-8">
 	var csv = "data/processed/newyorkcity.csv"
+	var cityGeojson = "data/processed/nyc-zip-codes.geojson"
+	var searchTerm = $('#search').val();
 	</script>
 	<div id = "resetAll">Reset All</div>
 	
 	
-	
+
 		
 		<div id="essayBox2">
 			<div id='essayBox-close2' class="glyphicon glyphicon-remove"></div>

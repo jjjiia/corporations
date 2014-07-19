@@ -5,7 +5,7 @@ var config = {
 	timeline: {
 		timer: null,
 		width: 1100,
-		barWidth: 5,
+		barWidth: 6,
 		// TODO: Update this and remove this "magic" constant for the width '1100'
 		xScale: d3.scale.linear().domain([1880,2014]).range([20, 950])
 	}
@@ -229,6 +229,35 @@ function renderWorldMap(data) {
 			renderNycMap(newData)
 			renderTimeline(newData)
 		})
+		
+		var tip = d3.tip()
+		  .attr('class', 'd3-tip-world')
+		  .offset([-10, 0])
+		map.call(tip);
+		map.selectAll("path")
+		.on('mouseover', function(d){
+			console.log("world")
+			if(table.group(data, ["jurisdiction"])[year]){
+				var totalCompanies = table.group(global.data, ["birthyear"])[year].length
+				var selectionCompanies = table.group(data, ["birthyear"])[year].length
+				
+				if(data.length == global.data.length){
+					var tipText = year + ": total "+ totalCompanies + " companies"
+				}else{
+					var jurisdiction = toTitleCase(data[0]["jurisdiction"])
+					var tipText = year +": "+ jurisdiction + " has "+ selectionCompanies+ " out of total "+ totalCompanies+ " companies"
+				}
+
+				tip.html(function(d){return tipText})
+				tip.show()
+			}
+		})
+		.on('mouseout', function(d){
+			tip.hide()
+		})
+		
+		
+		
 	return map
 }
 
@@ -490,8 +519,6 @@ function formatSpecialCountries(data){
 }
 
 function formatCompanyList(data){
-	
-	console.log(data)
 	var outputTable = "<table><col width = \"450px\" /><col width = \"100px\" /><col width = \"60px\" /><col width = \"100px\" />"
 	var firstRow = "<tr><td><span style=\"color:#ff2222\">Company Name</span></td><td><span style=\"color:#ff2222\">Year</span></td><td><span style=\"color:#ff2222\">Zipcode</span></td><td><span style=\"color:#ff2222\">Jurisdiction</td></span></tr>"
 	outputTable = outputTable+firstRow
@@ -672,7 +699,10 @@ function initTimeline(data) {
 	    .attr("x", function(d) {
 			return xScale(d)
 		})
+		var yScaleFlipped = d3.scale.log().domain([1,1000]).range([4, height-20]);
 
+	
+	
 	renderTimeline(data)
 }
 
@@ -687,7 +717,8 @@ function renderTimeline(data) {
 	var companiesByYear = table.group(data, ["birthyear"])
 
 	var timeline = d3.select("#svg-timeline").selectAll(".timeline-item")
-
+	console.log(data.length)
+	
 	timeline
 	    .attr("y", function(d) {
 			var a = companiesByYear[d]
@@ -727,7 +758,39 @@ function renderTimeline(data) {
 			var newData = companiesByYear[d]
 			renderNycMap(newData)
 			renderWorldMap(newData)
+			tip.hide()
+			
 		})
+		var xScale = config.timeline.xScale
+
+		var tip = d3.tip()
+		  .attr('class', 'd3-tip')
+		  .offset([-10, 0])
+		d3.selectAll("#svg-timeline svg").call(tip);
+		d3.selectAll("#svg-timeline svg").selectAll("rect")
+		.on('mouseover', function(d){
+			var year = xScale.invert($(this).attr("x"))
+			if(table.group(data, ["birthyear"])[year]){
+				var totalCompanies = table.group(global.data, ["birthyear"])[year].length
+				var selectionCompanies = table.group(data, ["birthyear"])[year].length
+				
+				if(data.length == global.data.length){
+					var tipText = year + ": total "+ totalCompanies + " companies"
+				}else{
+					var jurisdiction = toTitleCase(data[0]["jurisdiction"])
+					var tipText = year +": "+ jurisdiction + " has "+ selectionCompanies+ " out of total "+ totalCompanies+ " companies"
+				}
+
+				tip.html(function(d){return tipText})
+				tip.show()
+			}
+		})
+		.on('mouseout', function(d){
+			tip.hide()
+		})
+	
+
+
 }
 
 function timelineControlStop() {
