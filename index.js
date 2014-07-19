@@ -179,7 +179,38 @@ function renderNycMap(data) {
 			updateSliderRange(newDataStartEndYears[0],newDataStartEndYears[1])
 			renderWorldMap(newData)
 			renderTimeline(newData)
+			tip.hide()
+			
 		})
+
+		var tip = d3.tip()
+		  .attr('class', 'd3-tip-nyc')
+		  .offset([-10, 0])
+		map.call(tip);
+		map.on('mouseover', function(d){
+			var currentZipcode = d.properties.postalCode
+			if(table.group(global.data, ["zipcode"])[currentZipcode]){
+				var totalCompanies = table.group(global.data, ["zipcode"])[currentZipcode].length
+				if(data.length == global.data.length){
+					var tipText = currentZipcode + ": "+ totalCompanies + " Companies"
+					
+				}else{
+					var currentCompanies = table.group(data, ["zipcode"])[currentZipcode].length
+					var tipText = currentZipcode + ": "+ currentCompanies+" out of " + totalCompanies + " Companies"
+				}
+				
+				tip.html(function(d){return tipText})
+				tip.show()
+			}
+		})
+		.on('mouseout', function(d){
+			tip.hide()
+		})
+		
+
+
+
+
 
 	return map
 }
@@ -228,26 +259,27 @@ function renderWorldMap(data) {
 			d3.select(this).attr("fill", "black")
 			renderNycMap(newData)
 			renderTimeline(newData)
+			tip.hide()
+			
 		})
 		
 		var tip = d3.tip()
 		  .attr('class', 'd3-tip-world')
 		  .offset([-10, 0])
 		map.call(tip);
-		map.selectAll("path")
-		.on('mouseover', function(d){
-			console.log("world")
-			if(table.group(data, ["jurisdiction"])[year]){
-				var totalCompanies = table.group(global.data, ["birthyear"])[year].length
-				var selectionCompanies = table.group(data, ["birthyear"])[year].length
+		map.on('mouseover', function(d){
+			var currentJurisdiction = d.properties.name.toUpperCase()
+			if(table.group(global.data, ["jurisdiction"])[currentJurisdiction]){
+				var totalCompanies = table.group(global.data, ["jurisdiction"])[currentJurisdiction].length
 				
 				if(data.length == global.data.length){
-					var tipText = year + ": total "+ totalCompanies + " companies"
+					var tipText = toTitleCase(currentJurisdiction) + ": "+ totalCompanies + " Companies"
+					
 				}else{
-					var jurisdiction = toTitleCase(data[0]["jurisdiction"])
-					var tipText = year +": "+ jurisdiction + " has "+ selectionCompanies+ " out of total "+ totalCompanies+ " companies"
+					var currentCompanies = table.group(data, ["jurisdiction"])[currentJurisdiction].length
+					var tipText = toTitleCase(currentJurisdiction) + ": "+ currentCompanies+" out of " + totalCompanies + " Companies"
 				}
-
+				
 				tip.html(function(d){return tipText})
 				tip.show()
 			}
@@ -775,7 +807,7 @@ function renderTimeline(data) {
 				var selectionCompanies = table.group(data, ["birthyear"])[year].length
 				
 				if(data.length == global.data.length){
-					var tipText = year + ": total "+ totalCompanies + " companies"
+					var tipText = year + ": "+ totalCompanies + " companies"
 				}else{
 					var jurisdiction = toTitleCase(data[0]["jurisdiction"])
 					var tipText = year +": "+ jurisdiction + " has "+ selectionCompanies+ " out of total "+ totalCompanies+ " companies"
