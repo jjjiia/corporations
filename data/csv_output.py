@@ -24,54 +24,60 @@ states = ["DISTRICT OF COLUMBIA","ALABAMA", "ALASKA", "ARIZONA", "ARKANSAS", "CA
 countries_geo=["BAHAMAS, THE","KOREA,SOUTH","KOREA, NORTH","UNITED KINGDOM","AFGHANISTAN","ALBANIA","ALGERIA","SAMOA","ANDORRA","ANGOLA","ANTIGUA AND BARBUDA","AZERBAIJAN","ARGENTINA","AUSTRALIA","AUSTRIA","BAHRAIN","BANGLADESH","ARMENIA","BARBADOS","BELGIUM","BERMUDA","BHUTAN","BOLIVIA","BOSNIA AND HERZEGOVINA","BOTSWANA","BOUVET ISLAND","BRAZIL","BELIZE","BRITISH INDIAN OCEAN TERRITORY","SOLOMON ISLANDS","BRITISH VIRGIN ISLANDS","BRUNEI","BULGARIA","BURMA","BURUNDI","BELARUS","CAMBODIA","CAMEROON","CANADA","CAPE VERDE","CAYMAN ISLANDS","CENTRAL AFRICAN REPUBLIC","SRI LANKA","CHAD","CHILE","CHINA","TAIWAN","CHRISTMAS ISLAND","COCOS (KEELING) ISLANDS","COLOMBIA","COMOROS","MAYOTTE","COOK ISLANDS","COSTA RICA","CROATIA","CUBA","CYPRUS","CZECH REPUBLIC","BENIN","DENMARK","DOMINICA","DOMINICAN REPUBLIC","ECUADOR","EL SALVADOR","EQUATORIAL GUINEA","ETHIOPIA","ERITREA","ESTONIA","FAROE ISLANDS","FALKLAND ISLANDS (ISLAS MALVINAS)","SOUTH GEORGIA SOUTH SANDWICH ISLANDS","FIJI","FINLAND","ALAND ISLANDS","FRANCE","FRENCH GUIANA","FRENCH POLYNESIA","FRENCH SOUTHERN AND ANTARCTIC LANDS","DJIBOUTI","GABON","GEORGIA","PALESTINE","GERMANY","GHANA","GIBRALTAR","KIRIBATI","GREECE","GREENLAND","GRENADA","GUADELOUPE","GUAM","GUATEMALA","GUINEA","GUYANA","HAITI","HEARD ISLAND AND MCDONALD ISLANDS","HOLY SEE (VATICAN CITY)","HONDURAS","HONG KONG","HUNGARY","ICELAND","INDIA","INDONESIA","IRAN","IRAQ","IRELAND","ISRAEL","ITALY","COTE D'IVOIRE","JAMAICA","JAPAN","KAZAKHSTAN","JORDAN","KENYA","KUWAIT","KYRGYZSTAN","LAOS","LEBANON","LESOTHO","LATVIA","LIBERIA","LIBYA","LIECHTENSTEIN","LITHUANIA","LUXEMBOURG","MACAU","MADAGASCAR","MALAWI","MALAYSIA","MALDIVES","MALI","MALTA","MARTINIQUE","MAURITANIA","MAURITIUS","MEXICO","MONACO","MONGOLIA","MOLDOVA","MONTENEGRO","MONTSERRAT","MOROCCO","MOZAMBIQUE","OMAN","NAMIBIA","NAURU","NEPAL","NETHERLANDS","NETHERLANDS ANTILLES","ARUBA","NEW CALEDONIA","VANUATU","NEW ZEALAND","NICARAGUA","NIGER","NIGERIA","NIUE","NORFOLK ISLAND","NORWAY","NORTHERN MARIANA ISLANDS","MARSHALL ISLANDS","PALAU","PAKISTAN","PANAMA","PAPUA NEW GUINEA","PARAGUAY","PERU","PHILIPPINES","PITCAIRN ISLANDS","POLAND","PORTUGAL","GUINEA-BISSAU","TIMOR-LESTE","PUERTO RICO","QATAR","REUNION","ROMANIA","RUSSIA","RWANDA","SAINT BARTHELEMY","SAINT HELENA","SAINT KITTS AND NEVIS","ANGUILLA","SAINT LUCIA","SAINT MARTIN","SAINT PIERRE AND MIQUELON","SAINT VINCENT AND THE GRENADINES","SAN MARINO","SAO TOME AND PRINCIPE","SAUDI ARABIA","SENEGAL","SERBIA","SEYCHELLES","SIERRA LEONE","SINGAPORE","SLOVAKIA","VIETNAM","SLOVENIA","SOMALIA","SOUTH AFRICA","ZIMBABWE","SPAIN","WESTERN SAHARA","SUDAN","SURINAME","SVALBARD","SWAZILAND","SWEDEN","SWITZERLAND","SYRIA","TAJIKISTAN","THAILAND","TOGO","TOKELAU","TONGA","TRINIDAD AND TOBAGO","UNITED ARAB EMIRATES","TUNISIA","TURKEY","TURKMENISTAN","TURKS AND CAICOS ISLANDS","TUVALU","UGANDA","UKRAINE","MACEDONIA","EGYPT","UNITED KINGDOM","GUERNSEY","JERSEY","ISLE OF MAN","TANZANIA","UNITED STATES","VIRGIN ISLANDS","BURKINA FASO","URUGUAY","UZBEKISTAN","VENEZUELA","WALLIS AND FUTUNA","SAMOA","YEMEN","ZAMBIA"]
 noJ = 0
 
+laZips_geo = ["90002", "90003", "90004", "90005", "90006", "90007", "90008", "90010", "90011", "90012", "90013", "90014", "90015", "90016", "90017", "90018", "90019", "90020", "90021", "90022", "90023", "90024", "90025", "90026", "90027", "90028", "90029", "90031", "90032", "90033", "90034", "90035", "90036", "90037", "90038", "90039", "90040", "90041", "90042", "90043", "90044", "90045", "90046", "90047", "90048", "90049", "90056", "90057", "90058", "90059", "90061", "90062", "90063", "90064", "90065", "90066", "90067", "90068", "90069", "90071", "90073", "90077", "90089", "90094", "90095", "90201", "90210", "90211", "90212", "90220", "90221", "90222", "90230", "90232", "90240", "90241", "90242", "90245", "90247", "90248", "90249", "90250", "90254", "90255", "90260", "90261", "90262", "90263", "90265", "90266", "90270", "90272", "90274", "90275", "90277", "90278", "90280", "90290", "90291", "90292", "90293", "90301", "90302", "90303", "90304", "90305", "90401", "90402", "90403", "90404", "90405", "90501", "90502", "90503", "90504", "90505", "90506", "90601", "90602", "90603", "90604", "90605", "90606", "90623", "90630", "90631", "90638", "90639", "90640", "90650", "90660", "90670", "90701", "90703", "90704", "90706", "90710", "90712", "90713", "90715", "90716", "90717", "90723", "90731", "90732", "90744", "90745", "90746", "90747", "90755", "90802", "90803", "90804", "90805", "90806", "90807", "90808", "90810", "90813", "90814", "90815", "90822", "90831", "90840", "90846", "91001", "91006", "91007", "91008", "91010", "91011", "91016", "91020", "91023", "91024", "91030", "91040", "91042", "91046", "91101", "91103", "91104", "91105", "91106", "91107", "91108", "91125", "91126", "91201", "91202", "91203", "91204", "91205", "91206", "91207", "91208", "91210", "91214", "91301", "91302", "91303", "91304", "91306", "91307", "91311", "91316", "91321", "91324", "91325", "91326", "91330", "91331", "91335", "91340", "91342", "91343", "91344", "91345", "91350", "91351", "91352", "91354", "91355", "91356", "91361", "91362", "91364", "91367", "91381", "91382", "91384", "91387", "91390", "91401", "91402", "91403", "91405", "91406", "91411", "91423", "91436", "91501", "91502", "91504", "91505", "91506", "91521", "91522", "91523", "91601", "91602", "91604", "91605", "91606", "91607", "91608", "91702", "91706", "91709", "91710", "91711", "91722", "91723", "91724", "91731", "91732", "91733", "91740", "91741", "91744", "91745", "91746", "91748", "91750", "91754", "91755", "91759", "91765", "91766", "91767", "91768", "91770", "91773", "91775", "91776", "91780", "91789", "91790", "91791", "91792", "91801", "91803", "92397", "92821", "92823", "93243", "93510", "93523", "93532", "93534", "93535", "93536", "93543", "93544", "93550", "93551", "93552", "93553", "93563", "93591"]
+miamiZips_geo = ["33168", "33128", "33133", "33125", "33176", "33174", "33138", "33136", "33109", "33126", "33055", "33177", "33015", "33166", "33137", "33132", "33031", "33139", "33127", "33141", "33196", "33034", "33160", "33030", "33184", "33162", "33130", "33145", "33150", "33183", "33142", "33122", "33155", "33172", "33018", "33014", "33146", "33131", "33182", "33186", "33178", "33054", "33190", "33154", "33173", "33129", "33039", "33180", "33157", "33156", "33170", "33181", "33165", "33187", "33035", "33010", "33193", "33167", "33169", "33134", "33185", "33013", "33012", "33135", "33175", "33189", "33147", "33016", "33149", "33056", "33140", "33161", "33143", "33179", "33158"]
+sanFrancisco = ["94107", "94105", "94129", "94121", "94118", "94123", "94133", "94109", "94111", "94104", "94108", "94103", "94115", "94102", "94124", "94110", "94134", "94112", "94116", "94114", "94131", "94122", "94127", "94117", "94132"]
+
+
 undefined_geo =  ['YUGOSLAVIA','CHANNEL ISLANDS','ARMED SERVICES AMERICAS','AFRICA','ALL OTHERS']
-with open('nyc_world_06232014.csv', 'wb') as newcsvfile:
+with open('processed/losAngeles.csv', 'wb') as newcsvfile:
 
 #with open('nyc_all_06232014.csv', 'wb') as newcsvfile:
     spamwriter = csv.writer(newcsvfile)
-    spamwriter.writerow(["name", "jurisdiction", "jurisdictionType", "entityType", "status", "statusDescription", "birthyear", "birthmonth", "birthday", "deathyear", "deathmonth", "deathday", "zipcode"])
+    spamwriter.writerow(["name", "jurisdiction", "jurisdictionType", "entityType", "status", "birthyear", "zipcode"])
 
-    with open('CorporationsData_Original.csv', 'rb') as csvfile:
+    with open('/Users/Jia/Documents/map_corporations/data/raw/enigma-us-states-ca-sos-corporations-master-ee469731945819d33834b06cff601aee.csv', 'rb') as csvfile:
+        
         spamreader = csv.reader(csvfile)
         next(spamreader, None)
         for row in spamreader:
-            county = row[7]
-            name = row[0]
+           # print row
+            name = row[12]
 
-            birth = row[8]
+            birth = row[2]
+            
             if birth !="":
-                birth = row[8].split("-")
+                birth = row[2].split("-")
                 birthyear =  birth[0]
-                birthmonth =   birth[1]
-                birthday =  birth[2]
-               # print birthyear, birthmonth, birthday
-                
             else:
                 birth =""
             
-            jurisdiction =  row[2]
-            entityType = row[3]
-            status = row[4]
-            statusDescription = row[5]   
-            death = row[6]     
-            if status != "ACTIVE":
-                if death !="":
-                    death = row[6].split("-")
-                    deathyear = death[0]
-                    deathmonth = death[1]
-                    deathday = death[2]
-                    #print "death", deathyear, deathmonth, deathday
-            else:
-                death = "NONE"
-                deathyear = "NONE"
-                deathmonth = "NONE"
-                deathday = "NONE"
-                statusDescription = "NONE"     
+            
+            jurisdiction =  row[31]
+    
+            entityType = row[4]
+            status = row[3]
+            #statusDescription = row[5]   
+           # death = row[6]     
+#            if status != "ACTIVE":
+#                if death !="":
+#                    death = row[6].split("-")
+#                    deathyear = death[0]
+#                    deathmonth = death[1]
+#                    deathday = death[2]
+#                    #print "death", deathyear, deathmonth, deathday
+#            else:
+#                death = "NONE"
+#                deathyear = "NONE"
+#                deathmonth = "NONE"
+#                deathday = "NONE"
+#                statusDescription = "NONE"     
                 
-            address=row[9]
+#            address=row[9]
             #print address
-            zipcode = row[9].split(" ")[-1]
-            zipcode = zipcode.split("-")[0]
+            zipcode = row[-3]
+#            zipcode = zipcode.split("-")[0]
+            #print zipcode
             
             if jurisdiction == "EAST GERMANY" or jurisdiction == "WEST GERMANY":
                 jurisdiction = "GERMANY"
@@ -108,24 +114,23 @@ with open('nyc_world_06232014.csv', 'wb') as newcsvfile:
             
             
             
+            #print [name, jurisdiction, entityType, status, birthyear, zipcode]
             
-            if name !="" and jurisdiction !="" and status !="" and birth !="" and address !="":
-                if zipcode in nycZips_geo:
+            if name !="" and jurisdiction !="" and status !="" and birth !="" and zipcode!="":
+             #   if zipcode in miamiZips_geo:
                    # nyc +=1
                     #jurisdictionDict[jurisdiction] = jurisdictionDict.get(jurisdiction,0)+1
-                    if jurisdiction in states:
-                        jurisdictionType = "US"
-                        #spamwriter.writerow([name, jurisdiction, jurisdictionType, entityType, status, statusDescription, birthyear, birthmonth, birthday, deathyear, deathmonth, deathday, zipcode])
-                        
-                    elif jurisdiction in countries_geo:
-                        jurisdictionType = "world"
-                        spamwriter.writerow([name, jurisdiction, jurisdictionType, entityType, status, statusDescription, birthyear,birthmonth, birthday, deathyear,deathmonth,deathday, zipcode])
-                        
-                    else:
-                       # print jurisdiction
-                       
-                       jurisdictionDict[jurisdiction] = jurisdictionDict.get(jurisdiction,0)+1
-                        
+                if jurisdiction in countries_geo:
+                    jurisdictionType = "world"
+                    if zipcode in laZips_geo:
+                       # print row
+                        print [name, jurisdiction, jurisdictionType, entityType, status, birthyear, zipcode]
+                        spamwriter.writerow([name, jurisdiction, jurisdictionType, entityType, status, birthyear, zipcode])
+                
+                else:
+                    #print jurisdiction
+                    jurisdictionDict[jurisdiction] = jurisdictionDict.get(jurisdiction,0)+1
+                
                
 #print "nyc", nyc
 #print stateTally*100.00/nyc

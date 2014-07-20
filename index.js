@@ -192,12 +192,12 @@ function renderNycMap(data) {
 		map.on('mouseover', function(d){
 			var currentZipcode = d.properties.postalCode
 			if(table.group(data, ["zipcode"])[currentZipcode]){
-				var totalCompanies = table.group(global.data, ["zipcode"])[currentZipcode].length
-				if(data.length == global.data.length){
-					var tipText = currentZipcode + ": "+ totalCompanies + " Companies"
+
+				var currentCompanies = table.group(data, ["zipcode"])[currentZipcode].length
+				if(currentCompanies == 1){
+					var tipText = currentZipcode + ": "+ currentCompanies+" company"	
 				}else{
-					var currentCompanies = table.group(data, ["zipcode"])[currentZipcode].length
-					var tipText = currentZipcode + ": "+ currentCompanies+" out of " + totalCompanies + " Companies"
+					var tipText = currentZipcode + ": "+ currentCompanies+" companies"
 				}
 				tip.html(function(d){return tipText})
 				tip.show()
@@ -277,15 +277,13 @@ function renderWorldMap(data) {
 			var currentJurisdiction = d.properties.name.toUpperCase()
 			if(table.group(data, ["jurisdiction"])[currentJurisdiction]){
 				var totalCompanies = table.group(global.data, ["jurisdiction"])[currentJurisdiction].length
-				
-				if(data.length == global.data.length){
-					var tipText = toTitleCase(currentJurisdiction) + ": "+ totalCompanies + " Companies"
-					
+								
+				var currentCompanies = table.group(data, ["jurisdiction"])[currentJurisdiction].length
+				if(currentCompanies == 1){
+					var tipText = toTitleCase(currentJurisdiction) + ": "+ currentCompanies+" company"
 				}else{
-					var currentCompanies = table.group(data, ["jurisdiction"])[currentJurisdiction].length
-					var tipText = toTitleCase(currentJurisdiction) + ": "+ currentCompanies+" out of " + totalCompanies + " Companies"
+					var tipText = toTitleCase(currentJurisdiction) + ": "+ currentCompanies+" companies"
 				}
-				
 				tip.html(function(d){return tipText})
 				tip.show()
 			}else{
@@ -550,7 +548,7 @@ function formatSpecialCountries(data){
 		var sortedJurisdictionList = jurisdictionList.sort(function(a, b) {return a[1] - b[1]}).reverse()
 		if(sortedJurisdictionList.length >1){
 			var outputString = "Top Countries: <br/>"
-			var maxListLength = 5
+			var maxListLength = 10
 			if(sortedJurisdictionList.length<maxListLength){
 				maxListLength=sortedJurisdictionList.length
 			}
@@ -825,11 +823,13 @@ function renderTimeline(data) {
 				var totalCompanies = table.group(global.data, ["birthyear"])[year].length
 				var selectionCompanies = table.group(data, ["birthyear"])[year].length
 				
-				if(data.length == global.data.length){
-					var tipText = year + ": "+ totalCompanies + " companies"
+				var jurisdiction = toTitleCase(data[0]["jurisdiction"])
+				if(selectionCompanies == 1){
+					
+					var tipText = year +": "+ selectionCompanies+ " company"
 				}else{
-					var jurisdiction = toTitleCase(data[0]["jurisdiction"])
-					var tipText = year +": "+ jurisdiction + " has "+ selectionCompanies+ " out of total "+ totalCompanies+ " companies"
+					var tipText = year +": "+ selectionCompanies+ " companies"
+					
 				}
 
 				tip.html(function(d){return tipText})
@@ -873,9 +873,9 @@ function dataDidLoad(error, nycPaths, worldPaths, data) {
 			updateMaps()
 			
 			if(year+sliderRange >= 2014){
-				year = 1880
-				updateSliderRange(year, year + sliderRange)
-				updateMaps()
+			//	year = 1880
+			//	updateSliderRange(year, year + sliderRange)
+			//	updateMaps()
 				
 				timelineControlStop()
 			}
@@ -887,7 +887,7 @@ function dataDidLoad(error, nycPaths, worldPaths, data) {
 //				direction = 1
 //			}
 			year = year + 1
-		}, 100)
+		}, 200)
 	})
 
 	$("#timeline-controls .stop").click(timelineControlStop)
@@ -897,7 +897,7 @@ $(function() {
 	// Window has loaded
 
 	queue()
-		.defer(d3.json, 'data/processed/nyc-zip-codes.geojson')
+		.defer(d3.json, cityGeojson)
 		.defer(d3.json, 'data/processed/world.geojson')
 		.defer(d3.csv, csv)
 		.await(dataDidLoad);
